@@ -1,0 +1,311 @@
+#app {
+    margin: 0;
+    width: 100vw;
+    height: auto;
+    background: rgba(223, 223, 223, 0.473) !important;
+  
+    .not-found {
+      /* // 404页面 */
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+      background: url(../img/404.gif) no-repeat center;
+      background-size: 100% 100%;
+    }
+  }
+  
+  .ant-spin-spinning {
+    /* // 加载状态 */
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+  
+    span {
+      margin: 12px 0;
+    }
+  }
+  
+  .el-message {
+    min-width: 80%;
+  }
+  
+  
+  .loader-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 999;
+  
+    .loader {
+      display: block;
+      position: relative;
+      left: 50%;
+      top: 40%;
+      width: 120px;
+      height: 120px;
+      margin: -60px 0 0 -60px;
+      border-radius: 50%;
+      border: 3px solid transparent;
+      border-top-color: SandyBrown;
+      animation: spin 2s linear infinite;
+      z-index: 999;
+  
+      &::before {
+        content: "";
+        position: absolute;
+        top: 5px;
+        left: 5px;
+        right: 5px;
+        bottom: 5px;
+        border-radius: 50%;
+        border: 3px solid transparent;
+        border-top-color: SandyBrown;
+        animation: spin 3s linear infinite;
+      }
+  
+      &::after {
+        content: "";
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        right: 15px;
+        bottom: 15px;
+        border-radius: 50%;
+        border: 3px solid transparent;
+        border-top-color: SandyBrown;
+        animation: spin 1.5s linear infinite;
+      }
+    }
+  
+    @keyframes spin {
+      0% {
+        -webkit-transform: rotate(0deg);
+        -ms-transform: rotate(0deg);
+        transform: rotate(0deg);
+      }
+  
+      100% {
+        -webkit-transform: rotate(360deg);
+        -ms-transform: rotate(360deg);
+        transform: rotate(360deg);
+      }
+    }
+  
+    .loader-section {
+      position: fixed;
+      top: 0;
+      width: 51%;
+      height: 100%;
+      background: linear-gradient(to top, GhostWhite, LightCyan, Ivory);
+      z-index: 9;
+      transform: translateX(0);
+    }
+  
+    .section-left {
+      left: 0;
+    }
+  
+    .section-right {
+      right: 0;
+    }
+  
+    .load_title {
+      width: 100%;
+      text-align: center;
+      z-index: 9;
+      position: relative;
+      top: 44%;
+      height: 6%;
+  
+      p,
+      b {
+        font-weight: normal;
+        font-style: italic;
+        font-size: 16px;
+        color: SkyBlue;
+        display: flex;
+        justify-content: center;
+      }
+    }
+  }
+  
+  @font-face {
+    font-family: 'iconfont';
+    /* Project id 3160770 */
+    src: url('//at.alicdn.com/t/c/font_3596784_4e0xjp1emho.woff2?t=1660805215074') format('woff2'),
+      url('//at.alicdn.com/t/c/font_3596784_4e0xjp1emho.woff?t=1660805215074') format('woff'),
+      url('//at.alicdn.com/t/c/font_3596784_4e0xjp1emho.ttf?t=1660805215074') format('truetype');
+  }
+  
+  .iconfont {
+    font-family: 'iconfont';
+     /* // <i class="iconfont">&#xebcc;</i> */
+    font-size: 20px;
+    margin: 0 8px;
+    font-style: normal;
+  }
+  
+  
+  
+  
+  
+  
+  
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  body {
+    width: 100%;
+    height: 100%;
+  }
+  
+  ul {
+    list-style: none;
+  }
+  
+  
+  
+  /*导航条美化*/
+  ::-webkit-scrollbar {
+    width: 0px;
+    height: 0px;
+    background-color: #0d9696 !important;
+    /* // crollbar-width: none; */
+  }
+  
+  ::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 0px #0d9696 !important;
+    border-radius: 1px;
+    background-color: #0d9696 !important;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    border-radius: 1px;
+    box-shadow: inset 0 0 0px #a1dddd;
+    background-color: #a5dfdf;
+  }
+  
+  .animated {
+    transition-delay: 0s;
+    animation-delay: 0s !important;
+    /* // -webkit-animate-delay: 0s !important;
+    // animate-duration: 2s !important;
+    // -webkit-animate-duration: 2s !important; */
+  }
+  
+  
+  
+  /* // 公用 */
+  
+  video::-webkit-media-controls-current-time-display {
+    display: none;
+  }
+  
+  a,
+  span,
+  img {
+    border-style: none;
+    user-select: none;
+    -webkit-user-drag: none;
+    -webkit-user-select: none;
+  }
+  
+  html,
+  body,
+  div,
+  span,
+  applet,
+  object,
+  iframe,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p,
+  blockquote,
+  pre,
+  a,
+  abbr,
+  acronym,
+  address,
+  big,
+  cite,
+  code,
+  del,
+  dfn,
+  em,
+  img,
+  ins,
+  kbd,
+  q,
+  s,
+  samp,
+  small,
+  strike,
+  strong,
+  sub,
+  sup,
+  tt,
+  var,
+  b,
+  u,
+  i,
+  center,
+  dl,
+  dt,
+  dd,
+  ol,
+  ul,
+  li,
+  fieldset,
+  form,
+  label,
+  legend,
+  table,
+  caption,
+  tbody,
+  tfoot,
+  thead,
+  tr,
+  th,
+  td,
+  article,
+  aside,
+  canvas,
+  details,
+  embed,
+  figure,
+  figcaption,
+  footer,
+  header,
+  hgroup,
+  menu,
+  nav,
+  output,
+  ruby,
+  section,
+  summary,
+  time,
+  mark,
+  audio,
+  video,
+  textarea,
+  input,
+  select {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    box-sizing: border-box;
+  }

@@ -1,0 +1,41 @@
+{
+  "name": "kejin",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@coral-xyz/anchor": "^0.30.1",
+    "@solana/spl-token": "^0.4.9",
+    "@solana/wallet-adapter-base": "^0.9.23",
+    "@solana/wallet-adapter-vue": "0.4.0",
+    "@solana/wallet-adapter-wallets": "0.19.23",
+    "@solana/web3.js": "^1.95.4",
+    "amfe-flexible": "^2.2.1",
+    "axios": "^1.5.1",
+    "buffer": "^6.0.3",
+    "http-proxy-middleware": "^2.0.6",
+    "lib-flexible-computer": "^1.0.2",
+    "pinia": "^2.1.7",
+    "pinia-plugin-persistedstate": "^3.2.0",
+    "postcss-px2rem": "^0.3.0",
+    "postcss-pxtorem": "^6.0.0",
+    "three": "^0.169.0",
+    "vant": "^4.7.2",
+    "vue": "^3.3.4",
+    "vue-clipboard3": "^2.0.0",
+    "vue-i18n": "9",
+    "vue-router": "^4.2.5"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.2.3",
+    "autoprefixer": "^10.4.16",
+    "less": "^4.2.0",
+    "px2rem-loader": "^0.1.9",
+    "vite": "^4.4.5"
+  }
+}
