@@ -294,7 +294,7 @@ const mitSure = async () => {
   if (value2.value == "" || value2.value == 0)
     return showToast("请输入购买数量");
   try {
-    const signature = await SolanaService.buyNode(walletAddress.value, 1); // 假设amount为1
+    const signature = await SolanaService.buy_node(); // 假设amount为1
     console.log("Transaction signature:", signature);
   } catch (error) {
     console.error("Error buying node:", error);

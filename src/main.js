@@ -8,6 +8,8 @@ import { Tabbar, TabbarItem, NoticeBar, Popup, Toast, Icon,Overlay,Field,Paginat
 import { createI18n } from "vue-i18n";
 import messages from "./locale"; // 导入国际化语言包
 import { createPinia } from "pinia";
+import { Buffer } from 'buffer';
+
 
 //import piniaPluginPersistedstate from "pinia-plugin-persistedstate"; // 大菠萝持久化
 
@@ -23,6 +25,10 @@ const i18n = createI18n({
   fallbackLocale: "zh",
   messages,
 });
+
+if (!globalThis.Buffer) {
+  globalThis.Buffer = Buffer;
+}
 
 const app = createApp(App);
 

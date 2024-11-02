@@ -17,5 +17,6 @@ export default defineConfig({
       "@solana/wallet-adapter-vue",
       "@solana/wallet-adapter-wallets",
     ],
+    exclude: ["buffer"],
   },
 });
