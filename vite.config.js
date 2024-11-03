@@ -5,18 +5,37 @@ import path from "path";
 export default defineConfig({
   plugins: [vue()],
   resolve: {
-    // Vite路径别名配置
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      "process": "process/browser",
+      "stream": "stream-browserify",
+      "buffer": "buffer",
+      "util": "util",
+      "events": "events",
+    },
+  },
+  define: {
+    "process.env": {},
+    "global": {},
+  },
+  build: {
+    commonjsOptions: {
+      transformMixedEsModules: true,
+    },
+    rollupOptions: {
+      external: ["fs"],
     },
   },
   optimizeDeps: {
     include: [
+      "buffer",
+      "process",
+      "events",
+      "assert",
+      "stream-browserify",
+      "@project-serum/anchor",
       "@solana/web3.js",
-      "@solana/wallet-adapter-base",
-      "@solana/wallet-adapter-vue",
-      "@solana/wallet-adapter-wallets",
     ],
-    exclude: ["buffer"],
+    exclude: ["fs"],
   },
 });

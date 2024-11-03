@@ -11,8 +11,8 @@
       <div class="btn">确认</div>
     </div>
     <div class="info">
-      <span>地址：{{ walletAddress }}</span>
-      <div>NFT：{{ balance }}<span style="margin-left: 10px">已产生</span></div>
+      <span>地址：点击撒娇大开杀戒啊大家撒科技</span>
+      <div>NFT：<span>已产生</span></div>
     </div>
     <div class="water">
       <div class="head">ReptileSCAN</div>
@@ -33,13 +33,13 @@
     </div>
     <!-- 移动端流水 -->
     <div class="phone_list">
-      <div style="font-size: 18px; color: #ffffff">ReptileSCAN</div>
+      <div style="font-size: 18px;color: #FFFFFF;">ReptileSCAN</div>
       <div class="detail_list">
         <div class="phone_head">
           <span>哈希</span>
           <span>坐标</span>
         </div>
-        <div class="liushui" v-for="(item, index) in 15" :key="index">
+        <div class="liushui" v-for="(item,index) in 15" :key="index">
           <span>txn hash</span>
           <span>-6x+3</span>
         </div>
@@ -47,23 +47,18 @@
     </div>
     <div class="pages">
       <div class="limit">
-        <img src="../../assets/img/left.png" alt="" @click="reduce" />
-        <span>{{ currentPage }} / 页</span>
-        <img src="../../assets/img/right.png" alt="" @click="add" />
+        <img src="../../assets/img/left.png" alt="" @click="reduce"/>
+        <span>{{currentPage}} / 页</span>
+        <img src="../../assets/img/right.png" alt="" @click="add"/>
       </div>
     </div>
   </div>
 </template>
 <script setup>
-import { ref, onMounted } from "vue";
-import { Connection, clusterApiUrl } from "@solana/web3.js";
+import { ref } from "vue";
 
 const currentPage = ref(1);
-const list = ref([]);
-const connected = ref(false);
-const walletAddress = ref("");
-const balance = ref(0);
-const connection = new Connection(clusterApiUrl("devnet"));
+const list = ref([])
 
 const add = () => {
   currentPage.value += 1;
@@ -72,40 +67,6 @@ const reduce = () => {
   if (currentPage.value == 1) return 1;
   currentPage.value -= 1;
 };
-
-const updateWalletInfo = async () => {
-  if (window.solana?.publicKey) {
-    try {
-      const address = window.solana.publicKey.toString();
-      walletAddress.value = address;
-      const bal = await connection.getBalance(window.solana.publicKey);
-      balance.value = bal / 1000000000; // Convert lamports to SOL
-    } catch (error) {
-      console.error("Error updating wallet info:", error);
-    }
-  }
-};
-
-onMounted(() => {
-  const phantom = window.solana;
-  if (phantom) {
-    if (phantom.isConnected) {
-      connected.value = true;
-      updateWalletInfo();
-    }
-
-    phantom.on("connect", () => {
-      connected.value = true;
-      updateWalletInfo();
-    });
-    phantom.on("disconnect", () => {
-      connected.value = false;
-      walletAddress.value = "";
-      localStorage.removeItem("address");
-      balance.value = 0;
-    });
-  }
-});
 </script>
 <style lang="less" scoped>
 .minxi {
@@ -230,22 +191,22 @@ onMounted(() => {
       }
     }
   }
-  .phone_list {
+  .phone_list{
     display: none;
   }
   .pages {
     width: 10%;
     height: 30px;
     margin: 20px auto;
-    .limit {
+    .limit{
       display: flex;
       justify-content: space-between;
       align-items: center;
-      img {
+      img{
         width: 38px;
         height: 42px;
       }
-      span {
+      span{
         color: #813dff;
         font-size: 20px;
       }
@@ -297,12 +258,12 @@ onMounted(() => {
     .water {
       display: none;
     }
-    .phone_list {
+    .phone_list{
       display: block;
       width: 92%;
       height: auto;
       margin: 20% auto;
-      .detail_list {
+      .detail_list{
         width: 100%;
         height: auto;
         min-height: 350px;
@@ -314,25 +275,26 @@ onMounted(() => {
         background-color: #4a2a813f;
         border-radius: 15px;
         margin-top: 15px;
-        .phone_head {
+        .phone_head{
           display: flex;
           justify-content: space-between;
           align-items: center;
           font-size: 18px;
           color: #ffffff;
-          border-bottom: 1px solid #625c68;
+          border-bottom: 1px solid #625C68;
           padding: 2% 2% 2% 2%;
         }
-        .liushui {
+        .liushui{
           display: flex;
           justify-content: space-between;
           align-items: center;
           font-size: 18px;
           color: #ffffff;
-          border-bottom: 1px solid #625c68;
+          border-bottom: 1px solid #625C68;
           padding: 2% 2% 2% 2%;
           margin-top: 15px;
         }
+
       }
     }
   }

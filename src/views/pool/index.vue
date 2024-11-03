@@ -12,8 +12,8 @@
       <div class="btn">确认</div>
     </div>
     <div class="info">
-      <span>地址：{{ walletAddress }}</span>
-      <div>NFT：{{ balance }}<span style="margin-left: 10px">已产生</span></div>
+      <span>地址：点击撒娇大开杀戒啊大家撒科技</span>
+      <div>NFT：<span>已产生</span></div>
     </div>
     <div class="synthesis">
       <div class="left">
@@ -46,50 +46,10 @@
   </div>
 </template>
 <script setup>
-import { ref,onMounted} from "vue";
-import { Connection, clusterApiUrl } from "@solana/web3.js";
+import { ref } from "vue";
 
 const value1 = ref("");
-const value2 = ref("");
-const connected = ref(false);
-const walletAddress = ref("");
-const balance = ref(0);
-const connection = new Connection(clusterApiUrl("devnet"));
-
-const updateWalletInfo = async () => {
-  if (window.solana?.publicKey) {
-    try {
-      const address = window.solana.publicKey.toString();
-      walletAddress.value = address;
-      const bal = await connection.getBalance(window.solana.publicKey);
-      balance.value = bal / 1000000000; // Convert lamports to SOL
-    } catch (error) {
-      console.error("Error updating wallet info:", error);
-    }
-  }
-};
-
-onMounted(()=>{
-  const phantom = window.solana;
-  if (phantom) {
-    if (phantom.isConnected) {
-      connected.value = true;
-      updateWalletInfo();
-    }
-
-    phantom.on("connect", () => {
-      connected.value = true;
-      updateWalletInfo();
-    });
-    phantom.on("disconnect", () => {
-      connected.value = false;
-      walletAddress.value = "";
-      localStorage.removeItem("address");
-      balance.value = 0;
-    });
-  }
-})
-
+const value2 = ref("")
 </script>
 <style lang="less" scoped>
 @import url("@/assets/less/global.less");

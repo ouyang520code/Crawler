@@ -1,3 +1,4 @@
+import './polyfills'
 import { createApp } from "vue";
 import App from "./App.vue";
 import router from "./router";
@@ -8,11 +9,10 @@ import { Tabbar, TabbarItem, NoticeBar, Popup, Toast, Icon,Overlay,Field,Paginat
 import { createI18n } from "vue-i18n";
 import messages from "./locale"; // 导入国际化语言包
 import { createPinia } from "pinia";
-import { Buffer } from 'buffer';
 
-
-//import piniaPluginPersistedstate from "pinia-plugin-persistedstate"; // 大菠萝持久化
-
+window.global = window;
+window.process = process;
+window.Buffer = Buffer;
 
 router.beforeEach((to, from, next) => {
   document.title = `${to.meta.title || ""} | phyon`;
@@ -26,15 +26,10 @@ const i18n = createI18n({
   messages,
 });
 
-if (!globalThis.Buffer) {
-  globalThis.Buffer = Buffer;
-}
-
 const app = createApp(App);
 
 // 大菠萝配置
 const pinia = createPinia();
-// pinia.use(piniaPluginPersistedstate);
 app.use(pinia);
 
 // 设置token

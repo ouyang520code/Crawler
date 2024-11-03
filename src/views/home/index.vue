@@ -2,13 +2,7 @@
   <div class="home">
     <div class="images"></div>
     <div class="inpt">
-      <van-field
-        v-model="value1"
-        label=""
-        left-icon="search"
-        placeholder="请输入...."
-        center="true"
-      />
+      <van-field v-model="value1" label="" left-icon="search" placeholder="请输入...." :center="true" />
       <div class="btn">确认</div>
     </div>
     <div class="info">
@@ -37,22 +31,15 @@
       <div class="pro_right">
         <span>爬虫工作</span>
         <div class="daibi">
-          <van-field
-            v-model="value2"
-            placeholder="请输入代币"
-            :center="true"
-            type="number"
-          />
-          <div class="mint" @click="mitSure">确认</div>
+          <van-field v-model="inputAmount" placeholder="请输入代币" :center="true" />
+          <div class="mint" @click="buyNode">确认</div>
         </div>
         <div class="ruzhu">
           <text>入住节点信息</text>
           <div class="miaoshu"></div>
           <div class="fenye">
             <img src="../../assets/img/left.png" alt="" @click="reduce" />
-            <spna style="color: #813dff; font-size: 16px">
-              {{ number }} / 页</spna
-            >
+            <spna style="color: #813dff; font-size: 16px"> {{ number }} / 页</spna>
             <img src="../../assets/img/right.png" alt="" @click="add" />
           </div>
         </div>
@@ -70,25 +57,61 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import * as THREE from "three";
-import { Connection, clusterApiUrl } from "@solana/web3.js";
-import { showToast } from "vant";
-import SolanaService from "@/networks/solana/wallet";
+import { Connection, clusterApiUrl, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
+import { Program, AnchorProvider, Idl } from "@project-serum/anchor";
+import { walletService } from "@/utils/wallet";
+import {
+  TOKEN_PROGRAM_ID,
+  getAssociatedTokenAddress,
+} from '@solana/spl-token'
 
+import {
+  PROGRAM_ID,
+  TOKEN_MINT,
+  RECEIVER,
+  DATA_SEED,
+} from '@/utils/constants'
+import BN from 'bn.js'
+import { IDL } from "@/idl/idl";
+
+// 添加 window.solana 类型声明
+declare global {
+  interface Window {
+    solana?: any;
+  }
+}
+
+// 添加 THREE.js 类型扩展
+declare module 'three' {
+  interface Object3D {
+    material?: THREE.Material;
+    geometry?: THREE.BufferGeometry;
+  }
+}
+
+// 状态变量
 const value1 = ref("");
-const value2 = ref<any>("");
+const value2 = ref("");
 const threeJsContainer = ref<HTMLElement | null>(null);
 const connected = ref(false);
 const walletAddress = ref("");
 const balance = ref(0);
-const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
+const connection = new Connection(clusterApiUrl("devnet"));
 const finish = ref(false);
-let gressWidth = ref<any>(0);
+const gressWidth = ref(0);
 const number = ref(1);
+const wallet = ref<any>(null);
+const inputAmount = ref('');
+const loading = ref(false);
+const status = ref('');
+const walletBalance = ref(0);
+const tokenBalance = ref(0);
 
-let scene: THREE.Scene;
-let camera: THREE.OrthographicCamera;
+// THREE.js 相关变量声明
+let scene: THREE.Scene & { position: THREE.Vector3 };
+let camera: THREE.OrthographicCamera & { position: THREE.Vector3 };
 let renderer: THREE.WebGLRenderer;
 let gridGroup: THREE.Group;
 const gridSize = 32;
@@ -96,86 +119,43 @@ const gridSpacing = 10;
 const gridWidth = gridSize * gridSpacing;
 const originalColors = new Map<THREE.Mesh, THREE.MeshBasicMaterial>();
 
-const add = () => {
-  number.value += 1;
-};
-const reduce = () => {
-  if (number.value == 1) return 1;
-  number.value -= 1;
-};
-
-const initThreeJs = () => {
-  // 创建场景
-  scene = new THREE.Scene();
-  scene.background = null;
-
-  // 创建相机
-  camera = new THREE.OrthographicCamera(
-    -gridWidth / 2,
-    gridWidth / 2,
-    gridWidth / 2,
-    -gridWidth / 2,
-    1,
-    1000
+// 添加 PDA 账户获取函数
+const getPdaAccount = (walletPubkey: PublicKey, programId: PublicKey) => {
+  const [pdaAccount] = PublicKey.findProgramAddressSync(
+    [Buffer.from(DATA_SEED), walletPubkey.toBuffer()],
+    programId
   );
-  camera.position.set(0, 0, 50);
-  camera.lookAt(scene.position);
-
-  // 创建渲染器
-  const elments = document.querySelector(".pro_left") as HTMLElement;
-  renderer = new THREE.WebGLRenderer({ alpha: true });
-  renderer.setSize(elments.clientWidth, elments.clientHeight);
-  renderer.setClearColor(0x000000, 0);
-  threeJsContainer.value?.appendChild(renderer.domElement);
-
-  // 创建格子组
-  gridGroup = new THREE.Group();
-  scene.add(gridGroup);
-
-  // 创建格子
-  createGrid();
-
-  // 添加鼠标事件监听
-  window.addEventListener("click", onCanvasClick);
-
-  // 添加窗口尺寸变化监听
-  window.addEventListener("resize", onWindowResize);
-
-  // 渲染场景
-  animate();
+  return pdaAccount;
 };
 
+// 添加 THREE.js 相关函数
 const createGrid = () => {
-  // 创建平面材质，设置为透明
   const planeMaterial = new THREE.MeshBasicMaterial({
     color: 0xffffff,
     transparent: true,
     opacity: 0.0,
   });
-  // 创建线条材质
   const lineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff });
 
-  // 遍历创建格子平面和边框
   for (let i = 0; i < gridSize; i++) {
     for (let j = 0; j < gridSize; j++) {
-      // 创建平面
       const planeGeometry = new THREE.PlaneGeometry(gridSpacing, gridSpacing);
-      const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+      const plane = new THREE.Mesh(planeGeometry, planeMaterial) as THREE.Mesh & { position: THREE.Vector3 };
       plane.position.x = j * gridSpacing - gridWidth / 2 + gridSpacing / 2;
       plane.position.y = -(i * gridSpacing - gridWidth / 2 + gridSpacing / 2);
-      plane.position.z = 0.1; // 确保平面在线条之上
+      plane.position.z = 0.1;
       plane.name = "plane";
       gridGroup.add(plane);
-      originalColors.set(plane, plane.material.clone());
+      originalColors.set(plane, planeMaterial.clone());
 
-      // 创建边框线条
       const lineGeometry = new THREE.EdgesGeometry(planeGeometry);
-      const line = new THREE.LineSegments(lineGeometry, lineMaterial);
-      line.position.copy(plane.position); // 使用与平面相同的坐标
+      const line = new THREE.LineSegments(lineGeometry, lineMaterial) as THREE.LineSegments & { position: THREE.Vector3 };
+      line.position.copy(plane.position);
       gridGroup.add(line);
     }
   }
 };
+
 const onCanvasClick = (event: MouseEvent) => {
   const rect = renderer.domElement.getBoundingClientRect();
   const mouse = new THREE.Vector2(
@@ -195,111 +175,270 @@ const onCanvasClick = (event: MouseEvent) => {
     const row = Math.floor(y / gridSpacing);
     console.log(`格子坐标: (${row},${column})`);
 
-    const screenX =
-      rect.left + column * gridSpacing - (rect.width - gridWidth) / 2;
-    const screenY =
-      rect.top + row * gridSpacing - (rect.height - gridWidth) / 2;
-    console.log(`点击格子的左下角屏幕坐标: (${screenX},${screenY})`);
-    console.log(
-      `点击格子的中心屏幕坐标: (${screenX + gridSpacing / 2},${
-        screenY + gridSpacing / 2
-      })`
-    );
     // 恢复所有格子的颜色
     originalColors.forEach((material, mesh) => {
       mesh.material = material;
     });
+
     if (intersect.object.name === "plane") {
-      // 点击的格子修改颜色
       const plane = intersect.object as THREE.Mesh;
       plane.material = new THREE.MeshBasicMaterial({
         color: "#813DFF",
       });
     }
+
     // 生成dom定位
     const domElement = document.querySelector(".my-class-name") as HTMLElement;
-    domElement.style.display = "block";
-    const scrollX = window.scrollX || window.pageXOffset;
-    const scrollY = window.scrollY || window.pageYOffset;
-    domElement.style.left = `${event.clientX + scrollX}}px`;
-    domElement.style.top = `${event.clientY + scrollY}px`;
-    setTimeout(() => {
-      domElement.style.display = "none";
-    }, 1500);
+    if (domElement) {
+      domElement.style.display = "block";
+      const scrollX = window.scrollX || window.pageXOffset;
+      const scrollY = window.scrollY || window.pageYOffset;
+      domElement.style.left = `${event.clientX + scrollX}px`;
+      domElement.style.top = `${event.clientY + scrollY}px`;
+      setTimeout(() => {
+        domElement.style.display = "none";
+      }, 1500);
+    }
   }
 };
 
 const onWindowResize = () => {
-  camera.left = -gridWidth / 2;
-  camera.right = gridWidth / 2;
-  camera.top = gridWidth / 2;
-  camera.bottom = -gridWidth / 2;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  if (camera && renderer) {
+    camera.left = -gridWidth / 2;
+    camera.right = gridWidth / 2;
+    camera.top = gridWidth / 2;
+    camera.bottom = -gridWidth / 2;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  }
 };
+
 const animate = () => {
   requestAnimationFrame(animate);
-  renderer.render(scene, camera);
+  if (renderer && scene && camera) {
+    renderer.render(scene, camera);
+  }
 };
 
+// 更新钱包信息
 const updateWalletInfo = async () => {
-  if (window.solana?.publicKey) {
-    try {
-      const address = window.solana.publicKey.toString();
-      walletAddress.value = address;
-      const bal = await connection.getBalance(window.solana.publicKey);
-      balance.value = bal / 1000000000; // Convert lamports to SOL
-    } catch (error) {
-      console.error("Error updating wallet info:", error);
-    }
+  if (!wallet.value?.publicKey) return;
+  
+  try {
+    walletAddress.value = wallet.value.publicKey.toString();
+    balance.value = await walletService.getSolBalance(wallet.value.publicKey);
+    tokenBalance.value = await walletService.getTokenBalance(wallet.value.publicKey);
+  } catch (error) {
+    console.error('获取钱包信息失败:', error);
   }
 };
-const updateProgress = () => {
-  const interval = setInterval(() => {
-    gressWidth.value += 1; // 更新响应式数据
-    console.log("bili", gressWidth.value);
-    if (gressWidth.value >= 30) {
-      clearInterval(interval);
-    }
-  }, 300);
-};
-// updateProgress();
 
+// 连接钱包
+const connectWallet = async () => {
+  try {
+    const connectedWallet = await walletService.connectWallet();
+    if (connectedWallet) {
+      wallet.value = connectedWallet;
+      connected.value = true;
+      await updateWalletInfo();
+      return connectedWallet.publicKey;
+    }
+    return null;
+  } catch (error) {
+    if (walletService.isUserRejection(error)) {
+      console.log('用户取消了连接请求');
+      return null;
+    }
+    console.error('连接钱包失败:', error);
+    throw error;
+  }
+};
+
+// 获取 Provider
+const getProvider = () => {
+  if (!wallet.value) return null;
+  return walletService.getProvider(wallet.value);
+};
+
+// 购买节点
+const buyNode = async () => {
+  try {
+    if (!wallet.value) {
+      await connectWallet();
+      if (!wallet.value) {
+        throw new Error('请先连接钱包');
+      }
+    }
+
+    loading.value = true;
+    status.value = '交易处理中...';
+
+    const provider = getProvider();
+    if (!provider) {
+      throw new Error('未找到钱包提供者');
+    }
+
+    // 检查代币余额
+    const currentTokenBalance = await walletService.getTokenBalance(provider.wallet.publicKey);
+    if (currentTokenBalance < Number(inputAmount.value)) {
+      throw new Error(`代币余额不足。当前余额: ${currentTokenBalance}，需要: ${inputAmount.value}`);
+    }
+
+    const program = new Program(
+      IDL as unknown as Idl, 
+      PROGRAM_ID, 
+      provider
+    );
+
+    // 获取 PDA 账户
+    const pdaAccount = getPdaAccount(provider.wallet.publicKey, program.programId);
+    
+    // 获取用户的代币账户
+    const userTokenAccount = await getAssociatedTokenAddress(
+      TOKEN_MINT,
+      provider.wallet.publicKey
+    );
+
+    // 构建交易指令
+    const instructions = [];
+
+    // 检查 PDA 账户是否存在
+    const accountInfo = await connection.getAccountInfo(pdaAccount);
+    
+    if (!accountInfo) {
+      instructions.push(
+        await program.methods
+          .initUserData()
+          .accounts({
+            user: provider.wallet.publicKey,
+            pdaAccount: pdaAccount,
+            systemProgram: SystemProgram.programId,
+          })
+          .instruction()
+      );
+    }
+
+    const baseAmount = Number(inputAmount.value);
+    const multiplier = new BN(1_000_000_00);
+    const amountBN = new BN(baseAmount).mul(multiplier);
+
+    instructions.push(
+      await program.methods
+        .buyNode(amountBN)
+        .accounts({
+          userTokenAccount: userTokenAccount,
+          tokenMint: TOKEN_MINT,
+          burnAuthority: provider.wallet.publicKey,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          systemProgram: SystemProgram.programId,
+          pdaAccount: pdaAccount,
+          receiver: RECEIVER,
+        })
+        .instruction()
+    );
+
+    const tx = await provider.sendAndConfirm(
+      new Transaction().add(...instructions)
+    );
+
+    console.log(`交易成功！交易ID: ${tx}`);
+    await updateWalletInfo();
+    inputAmount.value = '';
+    
+  } catch (error: any) {
+    console.error('Error:', error);
+    if (!walletService.isUserRejection(error)) {
+      console.log(`错误: ${error.message}`);
+    }
+  } finally {
+    loading.value = false;
+    status.value = '';
+  }
+};
+
+// 组件挂载
 onMounted(() => {
-  const phantom = window.solana;
-  if (phantom) {
-    if (phantom.isConnected) {
+  // 设置钱包回调
+  walletService.setCallbacks({
+    onConnect: async (connectedWallet) => {
+      console.log('钱包已连接');
+      wallet.value = connectedWallet;
       connected.value = true;
-      updateWalletInfo();
-    }
-
-    phantom.on("connect", () => {
-      connected.value = true;
-      updateWalletInfo();
-    });
-    phantom.on("disconnect", () => {
+      await updateWalletInfo();
+    },
+    onDisconnect: () => {
+      console.log('钱包已断开连接');
       connected.value = false;
-      walletAddress.value = "";
-      localStorage.removeItem("address");
+      walletAddress.value = '';
       balance.value = 0;
-    });
-  }
+      wallet.value = null;
+      tokenBalance.value = 0;
+    }
+  });
+
+  // 初始化钱包监听
+  walletService.initWalletListeners();
+
   if (finish.value) {
     initThreeJs();
   }
 });
 
-// 购买节点
-const mitSure = async () => {
-  if (value2.value == "" || value2.value == 0)
-    return showToast("请输入购买数量");
-  try {
-    const signature = await SolanaService.buy_node(); // 假设amount为1
-    console.log("Transaction signature:", signature);
-  } catch (error) {
-    console.error("Error buying node:", error);
+// 组件卸载时清理
+onUnmounted(() => {
+  walletService.cleanup();
+});
+
+// 添加 THREE.js 初始化函数
+const initThreeJs = () => {
+  scene = new THREE.Scene() as THREE.Scene & { position: THREE.Vector3 };
+  scene.background = null;
+
+  camera = new THREE.OrthographicCamera(
+    -gridWidth / 2,
+    gridWidth / 2,
+    gridWidth / 2,
+    -gridWidth / 2,
+    1,
+    1000
+  ) as THREE.OrthographicCamera & { position: THREE.Vector3 };
+  
+  camera.position.set(0, 0, 50);
+  camera.lookAt(scene.position);
+
+  const elements = document.querySelector(".pro_left") as HTMLElement;
+  if (!elements) return;
+  
+  renderer = new THREE.WebGLRenderer({ alpha: true });
+  renderer.setSize(elements.clientWidth, elements.clientHeight);
+  renderer.setClearColor(0x000000, 0);
+  
+  if (threeJsContainer.value) {
+    threeJsContainer.value.appendChild(renderer.domElement);
   }
+
+  gridGroup = new THREE.Group();
+  scene.add(gridGroup);
+
+  createGrid();
+
+  window.addEventListener("click", onCanvasClick);
+  window.addEventListener("resize", onWindowResize);
+
+  animate();
 };
+
+// 其他函数保持不变...
+const add = () => {
+  number.value += 1;
+};
+
+const reduce = () => {
+  if (number.value === 1) return;
+  number.value -= 1;
+};
+
+// ... 其他 THREE.js 相关函数保持不变
 </script>
 
 <style lang="less" scoped>
@@ -309,6 +448,7 @@ const mitSure = async () => {
   height: auto;
   position: relative;
   background: linear-gradient(135deg, #271844 0%, #0d0d0d 55%, #261842 100%);
+
   .images {
     width: 100%;
     height: 589px;
@@ -317,6 +457,7 @@ const mitSure = async () => {
     background-size: 65% 200%;
     background-position: top;
   }
+
   .inpt {
     width: 50%;
     height: 76px;
@@ -324,6 +465,7 @@ const mitSure = async () => {
     padding-bottom: 8%;
     display: flex;
     justify-content: space-between;
+
     .van-cell {
       width: 60%;
       height: 76px;
@@ -333,9 +475,11 @@ const mitSure = async () => {
       font-size: 18px;
       border-radius: 10px;
     }
+
     ::v-deep .van-field__control {
       color: #ffffff;
     }
+
     .btn {
       width: 35%;
       height: 76px;
@@ -347,6 +491,7 @@ const mitSure = async () => {
       border-radius: 10px;
     }
   }
+
   .info {
     width: 70%;
     height: 119px;
@@ -357,19 +502,23 @@ const mitSure = async () => {
     box-sizing: border-box;
     border-radius: 8px;
     background: linear-gradient(152deg, #261840 0%, #1e1430 47%, #1f1534 100%);
+
     span {
       color: #ffffff;
       font-size: 18px;
     }
+
     div {
       color: #ffffff;
       font-size: 18px;
       margin-top: 2%;
+
       span {
         color: #813dff;
       }
     }
   }
+
   .product {
     width: 70%;
     height: 800px;
@@ -378,11 +527,13 @@ const mitSure = async () => {
     margin: -2% auto;
     box-sizing: border-box;
     padding-bottom: 2%;
+
     .pro_left {
       width: 65%;
       height: 100%;
       border: 1px solid #8a3dff;
       overflow-y: scroll;
+
       .my-class-name {
         display: none;
         position: absolute;
@@ -402,6 +553,7 @@ const mitSure = async () => {
         }
       }
     }
+
     .gress {
       width: 65%;
       height: 100%;
@@ -409,23 +561,27 @@ const mitSure = async () => {
       flex-direction: column;
       align-items: center;
       margin-top: 20px;
+
       .gress_box {
         width: 420px;
         height: 23px;
         background: #624f82;
         border-radius: 12px;
         position: relative;
+
         img {
           position: absolute;
           width: 100px;
           height: 70px;
           margin: -18px -18px;
         }
+
         .bili {
           height: 100%;
           background: linear-gradient(173deg, #7239b2 0%, #22f2eb 100%);
           box-shadow: inset 0px -3px 6px 1px rgba(0, 0, 0, 0.51);
           border-radius: 12px;
+
           span {
             position: absolute;
             color: white;
@@ -436,32 +592,34 @@ const mitSure = async () => {
           }
         }
       }
+
       img {
         width: 680px;
         height: 680px;
         margin-top: 5%;
       }
     }
+
     .pro_right {
       width: 32%;
       height: 100%;
       display: flex;
       flex-direction: column;
       padding: 2% 2%;
-      background: linear-gradient(
-        146deg,
-        #261840 0%,
-        #261840 0%,
-        #1e1430 51%,
-        #261840 100%
-      );
+      background: linear-gradient(146deg,
+          #261840 0%,
+          #261840 0%,
+          #1e1430 51%,
+          #261840 100%);
       border-radius: 15px;
+
       span {
         font-family: SimHei, SimHei;
         font-weight: 400;
         font-size: 24px;
         color: #ffffff;
       }
+
       .daibi {
         width: 100%;
         height: 100px;
@@ -472,14 +630,17 @@ const mitSure = async () => {
         justify-content: space-between;
         align-items: center;
         padding: 2% 2%;
+
         .van-cell {
           background-color: #181126;
           width: 70%;
           border-radius: 12px;
         }
+
         ::v-deep .van-field__control {
           color: #ffffff;
         }
+
         .mint {
           width: 25%;
           height: 42px;
@@ -488,19 +649,21 @@ const mitSure = async () => {
           color: #ffffff;
           text-align: center;
           line-height: 42px;
-          cursor: pointer;
         }
       }
+
       .ruzhu {
         height: 420px;
         border-radius: 15px;
         border: 1px solid #8a3dff;
         padding: 4% 4%;
         box-sizing: border-box;
+
         text {
           font-size: 18px;
           color: #ffffff;
         }
+
         .miaoshu {
           width: 98%;
           height: 325px;
@@ -508,18 +671,21 @@ const mitSure = async () => {
           background: #181126;
           border-radius: 12px;
         }
+
         .fenye {
           width: 46%;
           margin: 10px auto;
           display: flex;
           justify-content: space-between;
           align-items: center;
+
           img {
             width: 19px;
             height: 22px;
           }
         }
       }
+
       .sui {
         height: 70px;
         border-radius: 15px 15px 15px 15px;
@@ -532,15 +698,18 @@ const mitSure = async () => {
         padding-left: 4%;
         box-sizing: border-box;
         margin-top: 15px;
+
         span {
           color: #813dff;
         }
+
         img {
           width: 24px;
           height: 33px;
           margin-left: 10px;
         }
       }
+
       .linqu {
         height: 70px;
         background-color: #813dff;
@@ -552,6 +721,7 @@ const mitSure = async () => {
         margin-top: 15px;
         border-radius: 48px;
         font-size: 18px;
+
         img {
           width: 29px;
           height: 39px;
@@ -560,6 +730,7 @@ const mitSure = async () => {
       }
     }
   }
+
   @media (max-width: 450px) {
     .images {
       width: 100%;
@@ -569,6 +740,7 @@ const mitSure = async () => {
       background-size: 100% 130%;
       background-position: top;
     }
+
     .inpt {
       width: 95%;
       height: 73px;
@@ -579,6 +751,7 @@ const mitSure = async () => {
         border-radius: 8px;
         font-size: 14px;
       }
+
       .btn {
         width: 35%;
         height: 40px;
@@ -587,28 +760,34 @@ const mitSure = async () => {
         font-size: 14px;
       }
     }
+
     .info {
       width: 95%;
       height: 78px;
       border-radius: 5px;
       margin: 34% auto;
+
       span {
         font-size: 12px;
       }
+
       div {
         font-size: 14px;
       }
     }
+
     .product {
       width: 95%;
       height: 1000px;
       display: flex;
       flex-direction: column;
       margin: -28% auto;
+
       .pro_left {
         width: 100%;
         height: 600px;
         border: 1px solid #813dff;
+
         .my-class-name {
           display: none;
           position: absolute;
@@ -617,6 +796,7 @@ const mitSure = async () => {
           background: url("../../assets/img/hezi.png");
           background-size: 100% 100%;
           background-repeat: no-repeat;
+
           .address {
             margin: 10px auto;
             display: flex;
@@ -627,6 +807,7 @@ const mitSure = async () => {
           }
         }
       }
+
       .gress {
         width: 100%;
         height: 600px;
@@ -634,23 +815,27 @@ const mitSure = async () => {
         flex-direction: column;
         align-items: center;
         margin-top: 20px;
+
         .gress_box {
           width: 280px;
           height: 20px;
           background: #624f82;
           border-radius: 12px;
           position: relative;
+
           img {
             position: absolute;
             width: 70px;
             height: 50px;
             margin: -10px -15px;
           }
+
           .bili {
             height: 100%;
             background: linear-gradient(173deg, #7239b2 0%, #22f2eb 100%);
             box-shadow: inset 0px -3px 6px 1px rgba(0, 0, 0, 0.51);
             border-radius: 12px;
+
             span {
               position: absolute;
               color: white;
@@ -661,62 +846,76 @@ const mitSure = async () => {
             }
           }
         }
+
         img {
           width: 389px;
           height: 389px;
           margin-top: 5%;
         }
       }
+
       .pro_right {
         width: 100%;
         height: 580px;
         padding: 3% 4%;
         margin-top: 5%;
+
         span {
           font-size: 16px;
         }
+
         .daibi {
           width: 100%;
           height: 70px;
+
           .mint {
             font-size: 14px;
           }
         }
+
         .ruzhu {
           width: 100%;
           height: 244px;
           padding: 2% 4%;
+
           text {
             font-size: 16px;
           }
+
           .miaoshu {
             height: 168px;
           }
+
           .fenye {
             width: 46%;
             margin: 10px auto;
             display: flex;
             justify-content: space-between;
             align-items: center;
+
             img {
               width: 19px;
               height: 22px;
             }
           }
         }
+
         .sui {
           height: 56px;
           font-size: 16px;
+
           img {
             width: 19px;
             height: 22px;
             margin-left: 10px;
           }
         }
+
         .linqu {
           height: 56px;
           padding-left: 34%;
           font-size: 16px;
+
           img {
             width: 16px;
             height: 18px;
