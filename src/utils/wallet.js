@@ -2,6 +2,7 @@ import { Connection, PublicKey, LAMPORTS_PER_SOL, clusterApiUrl } from '@solana/
 import { AnchorProvider } from '@project-serum/anchor'
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-phantom'
 import { TOKEN_MINT } from './constants'
+import { getAssociatedTokenAddress } from "@solana/spl-token";
 
 // 导出钱包适配器
 export const wallets = [
@@ -18,6 +19,7 @@ export class WalletService {
       onConnect: null,
       onDisconnect: null
     }
+    this.wallet = null
   }
 
   // 检查钱包是否已安装
@@ -38,6 +40,7 @@ export class WalletService {
         throw new Error('请安装 Phantom 钱包')
       }
       await wallet.connect()
+      this.wallet = wallet
       return wallet
     } catch (error) {
       console.error('Wallet connection error:', error)
@@ -108,7 +111,16 @@ export class WalletService {
 
   // 设置回调
   setCallbacks(callbacks) {
-    this.callbacks = callbacks
+    this.callbacks = {
+      onConnect: (wallet) => {
+        this.wallet = wallet
+        callbacks.onConnect?.(wallet)
+      },
+      onDisconnect: () => {
+        this.wallet = null
+        callbacks.onDisconnect?.()
+      }
+    }
   }
 
   // 初始化钱包监听
@@ -160,6 +172,30 @@ export class WalletService {
   // 获取 connection 实例
   getConnection() {
     return this.connection
+  }
+
+  /**
+   * Gets or creates the user's associated token account
+   * @returns {Promise<{address: PublicKey}>} The token account address
+   */
+  async getUserTokenAccount() {
+    if (!this.wallet?.publicKey) {
+      throw new Error("Wallet not connected");
+    }
+
+    try {
+      const tokenAccountAddress = await getAssociatedTokenAddress(
+        TOKEN_MINT,
+        this.wallet.publicKey
+      );
+
+      return {
+        address: tokenAccountAddress
+      };
+    } catch (error) {
+      console.error("Error getting user token account:", error);
+      throw error;
+    }
   }
 }
 

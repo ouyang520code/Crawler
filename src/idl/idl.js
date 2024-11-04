@@ -190,11 +190,25 @@ export const IDL = {
                     "name": "systemProgram",
                     "isMut": false,
                     "isSigner": false
+                },
+                {
+                    "name": "tokenMint",
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "userTokenAccount",
+                    "isMut": true,
+                    "isSigner": false
                 }
             ],
             "args": [
                 {
                     "name": "editionNumber",
+                    "type": "u64"
+                },
+                {
+                    "name": "amount",
                     "type": "u64"
                 }
             ]
@@ -438,7 +452,7 @@ export const IDL = {
         {
             "code": 6000,
             "name": "AmountTooSmall",
-            "msg": "The amount must be multiple of 1024."
+            "msg": "The amount must be multiple of 100."
         },
         {
             "code": 6001,
@@ -479,6 +493,11 @@ export const IDL = {
             "code": 6008,
             "name": "InvalidAccountData",
             "msg": "Incorrect data"
+        },
+        {
+            "code": 6009,
+            "name": "TokenMintErr",
+            "msg": "Transfer to tokens"
         }
     ]
 }
