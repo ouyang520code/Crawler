@@ -17,7 +17,7 @@ export const RECEIVER = new PublicKey(
 );
 
 // PDA seeds
-export const DATA_SEED = "user_data";
+export const DATA_SEED = "data";
 export const ADMIN_SEED = "adminGlobal";
 export const POINT_SEED = "point";
 export const EDITION_MARKER_SEED = "edition_marker";
@@ -27,7 +27,7 @@ export const METADATA_INFO = new PublicKey(
   "55uh8C2y2MKoMpkkPQVHc8EymQ822M1eeYurTim1g5v4"
 );
 export const MASTER_EDITION_INFO = new PublicKey(
-  "25izbF3Xb7P14TFoco4p7kyMvJdNYTUEQp4ZZHPYvw9y"
+  "FqZG8hawmUGmWgbmZ2Zu73kyTvMDFZqAj6y6KWSyfAyF"
 );
 export const MINT_INFO = new PublicKey(
   "3gQVUrzb5qWFsNppMWMVMPMaRkpDBqtH5RZHYaokoBdE"
@@ -35,6 +35,7 @@ export const MINT_INFO = new PublicKey(
 export const TOKEN_METADATA_PROGRAM_ID = new PublicKey(
   "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
 );
+
 export const MASTER_METADATA = new PublicKey(
   "BVMbuAkQYMYpbygCS8gZZ3s75QkymAe1cuAjNUWKeTQc"
 );
@@ -70,4 +71,5 @@ export const CONSTANTS = {
   TOKEN_DECIMALS,
   MIN_AMOUNT,
   MINT_NFT_AMOUNT,
+  MINT_INFO
 };

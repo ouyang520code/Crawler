@@ -25,8 +25,8 @@
         <div ref="threeJsContainer" class="three-js-container"></div>
         <div class="my-class-name">
           <div class="address">
-            <span>坐标信息：-6X+8</span>
-            <span>哈希：LINK(超链接）</span>
+            <span>坐标信息：{{ zuobiao }}</span>
+            <span>哈希：{{ hanshu }}</span>
           </div>
         </div>
       </div>
@@ -52,9 +52,13 @@
         <div class="ruzhu">
           <text>入住节点信息</text>
           <div class="miaoshu">
-            <span v-for="(item, index) in coordinate" :key="index">{{
-              item
-            }}</span>
+            <span
+              v-for="(item, index) in coordinate"
+              :key="index"
+              style="font-size: 16px; cursor: pointer"
+              @click="worm(item)"
+              >坐标：{{ item.x }} + {{ item.y }}</span
+            >
           </div>
           <div class="fenye">
             <img src="../../assets/img/left.png" alt="" @click="reduce" />
@@ -78,7 +82,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, nextTick } from "vue";
 import * as THREE from "three";
 import {
   Connection,
@@ -150,13 +154,17 @@ const walletBalance = ref(0);
 const tokenBalance = ref(0);
 const coordinate = ref([]);
 const fragment = ref(0);
+const hanshu = ref("");
+const zuobiao = ref("");
 
 // THREE.js 相关变量声明
 let scene: THREE.Scene & { position: THREE.Vector3 };
 let camera: THREE.OrthographicCamera & { position: THREE.Vector3 };
 let renderer: THREE.WebGLRenderer;
 let gridGroup: THREE.Group;
+let matrix = [];
 const gridSize = 32;
+let count = 1;
 const gridSpacing = 10;
 const gridWidth = gridSize * gridSpacing;
 const originalColors = new Map<THREE.Mesh, THREE.MeshBasicMaterial>();
@@ -169,7 +177,6 @@ const getPdaAccount = (walletPubkey: PublicKey, programId: PublicKey) => {
   );
   return pdaAccount;
 };
-
 // 添加 THREE.js 相关函数
 const createGrid = () => {
   const planeMaterial = new THREE.MeshBasicMaterial({
@@ -177,28 +184,27 @@ const createGrid = () => {
     transparent: true,
     opacity: 0.0,
   });
-  const lineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff });
 
+  const lineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff });
+  // 遍历创建格子平面和边框
   for (let i = 0; i < gridSize; i++) {
+    matrix[i] = [];
     for (let j = 0; j < gridSize; j++) {
+      matrix[i][j] = count++;
+      // 创建平面
       const planeGeometry = new THREE.PlaneGeometry(gridSpacing, gridSpacing);
-      const plane = new THREE.Mesh(
-        planeGeometry,
-        planeMaterial
-      ) as THREE.Mesh & { position: THREE.Vector3 };
+      const plane = new THREE.Mesh(planeGeometry, planeMaterial);
       plane.position.x = j * gridSpacing - gridWidth / 2 + gridSpacing / 2;
       plane.position.y = -(i * gridSpacing - gridWidth / 2 + gridSpacing / 2);
-      plane.position.z = 0.1;
-      plane.name = "plane";
+      plane.position.z = 0.1; // 确保平面在线条之上
+      plane.name = `plane=${matrix[i][j]}-${i}-${j}`;
       gridGroup.add(plane);
-      originalColors.set(plane, planeMaterial.clone());
+      originalColors.set(plane, plane.material.clone());
 
+      // 创建边框线条
       const lineGeometry = new THREE.EdgesGeometry(planeGeometry);
-      const line = new THREE.LineSegments(
-        lineGeometry,
-        lineMaterial
-      ) as THREE.LineSegments & { position: THREE.Vector3 };
-      line.position.copy(plane.position);
+      const line = new THREE.LineSegments(lineGeometry, lineMaterial);
+      line.position.copy(plane.position); // 使用与平面相同的坐标
       gridGroup.add(line);
     }
   }
@@ -215,6 +221,7 @@ const onCanvasClick = (event: MouseEvent) => {
   raycaster.setFromCamera(mouse, camera);
 
   const intersects = raycaster.intersectObjects(gridGroup.children);
+
   if (intersects.length > 0) {
     const intersect = intersects[0];
     const x = intersect.point.x + gridWidth / 2;
@@ -223,30 +230,54 @@ const onCanvasClick = (event: MouseEvent) => {
     const row = Math.floor(y / gridSpacing);
     console.log(`格子坐标: (${row},${column})`);
 
+    const screenX =
+      rect.left + column * gridSpacing - (rect.width - gridWidth) / 2;
+    const screenY =
+      rect.top + row * gridSpacing - (rect.height - gridWidth) / 2;
+    console.log(`点击格子的左下角屏幕坐标: (${screenX},${screenY})`);
+    console.log(
+      `点击格子的中心屏幕坐标: (${screenX + gridSpacing / 2},${
+        screenY + gridSpacing / 2
+      })`,
+      intersect
+    );
     // 恢复所有格子的颜色
     originalColors.forEach((material, mesh) => {
-      mesh.material = material;
+      // mesh.material = material;
+      // if (mesh.name.includes('active')) {
+      //   mesh.name = mesh.name.split('active').join('');
+      // }
+      
     });
-
-    if (intersect.object.name === "plane") {
-      const plane = intersect.object as THREE.Mesh;
-      plane.material = new THREE.MeshBasicMaterial({
-        color: "#813DFF",
-      });
+    // 查找符合指定条件的网格修改材质
+    const targetPlane = gridGroup.children.find((child) =>
+      child.name.includes(`active`)
+    );
+    if (targetPlane && intersect.object.name === targetPlane.name) {
+      console.log(targetPlane, '00000');
+      
+      // 生成dom定位
+      const domElement = document.querySelector(".my-class-name") as HTMLElement;
+      if (domElement) {
+        domElement.style.display = "block";
+        const scrollX = window.scrollX || window.pageXOffset;
+        const scrollY = window.scrollY || window.pageYOffset;
+        domElement.style.left = `${event.clientX + scrollX}px`;
+        domElement.style.top = `${event.clientY + scrollY}px`;
+        const items = JSON.parse(localStorage.getItem("item"));
+        console.log("items>>>", items);
+        hanshu.value = items.tx.substring(0, 4) + "....." + items.tx.slice(-4);
+        zuobiao.value = items.x + "+" + items.y;
+        setTimeout(() => {
+          domElement.style.display = "none";
+        }, 1500);
+      }   
+      // const plane = intersect.object as THREE.Mesh;
+      // plane.material = new THREE.MeshBasicMaterial({
+      //   color: "#813DFF",
+      // });
     }
-
-    // 生成dom定位
-    const domElement = document.querySelector(".my-class-name") as HTMLElement;
-    if (domElement) {
-      domElement.style.display = "block";
-      const scrollX = window.scrollX || window.pageXOffset;
-      const scrollY = window.scrollY || window.pageYOffset;
-      domElement.style.left = `${event.clientX + scrollX}px`;
-      domElement.style.top = `${event.clientY + scrollY}px`;
-      setTimeout(() => {
-        domElement.style.display = "none";
-      }, 1500);
-    }
+    
   }
 };
 
@@ -263,8 +294,20 @@ const onWindowResize = () => {
 
 const animate = () => {
   requestAnimationFrame(animate);
-  if (renderer && scene && camera) {
-    renderer.render(scene, camera);
+  renderer.render(scene, camera);
+};
+const updateGridColor = (item: any) => {
+  if (threeJsContainer.value && gridGroup.children.length) {
+    // 查找符合指定条件的网格修改材质
+    const targetPlane = gridGroup.children.find((child) =>
+      child.name.includes(`plane=${item.x}`)
+    );
+    if (targetPlane) {
+      targetPlane.material = new THREE.MeshBasicMaterial({
+        color: "#813DFF",
+      });
+      targetPlane.name = targetPlane.name + 'active';
+    }
   }
 };
 
@@ -275,6 +318,7 @@ const updateWalletInfo = async () => {
     walletAddress.value = wallet.value.publicKey.toString();
     // balance.value = await walletService.getSolBalance(wallet.value.publicKey);
     if (walletAddress.value.length > 0) {
+      // getaddress();
       getInfo();
     }
     tokenBalance.value = await walletService.getTokenBalance(
@@ -439,7 +483,7 @@ const getInfo = () => {
     .then((res) => {
       if (res.code == 200) {
         console.log("res>>>用户信息", res);
-
+        fragment.value = res.data.all_point;
         balance.value = res.data.node_success;
       }
     })
@@ -459,6 +503,8 @@ const getchaxun = (tx) => {
       if (res.code == 200) {
         closeToast();
         coordinate.value = res.data;
+        console.log("res>>>", res);
+
         // is_use.value = res.data[0].is_use
         // getProduce(is_use.value)
         console.log("res>>>", res);
@@ -468,22 +514,6 @@ const getchaxun = (tx) => {
       closeToast;
       console.log("err>>", err);
     });
-};
-// 查询是否已产出
-const getProduce = (type) => {
-  $apis
-    .getnodedata({
-      address: walletAddress.value,
-      state: type,
-      page: number.value,
-      limit: 10,
-    })
-    .then((res) => {
-      if (res.code == 200) {
-        balance.value = res.data.balance ?? 0;
-      }
-    })
-    .catch((err) => {});
 };
 //利用地址查询存在的坐标
 const getaddress = () => {
@@ -496,6 +526,7 @@ const getaddress = () => {
     .then((res) => {
       if (res.code == 200) {
         console.log("res地址查询坐标>>>", res);
+        coordinate.value = res.data
       } else {
         showToast("查询失败");
         console.log("res失败>>", res);
@@ -509,9 +540,57 @@ const getaddress = () => {
 // 查询确认
 const queryaddress = () => {
   if (value1.value == "") return showToast("请输入地址");
-  if(value1.value!=walletAddress.value) return showToast("请输入正确的地址")
+  if (value1.value != walletAddress.value) return showToast("请输入正确的地址");
   getaddress();
 };
+//利用坐标查询哈希数据
+const getcore = (item) => {
+  $apis
+    .gethax({ x: item.x, y: item.y })
+    .then((res) => {
+      if (res.code == 200) {
+        console.log("res哈希", res);
+      } else {
+        showToast(res.error);
+        console.log("res哈希数据》》》", res);
+      }
+    })
+    .catch((err) => {
+      console.log("哈希查询》》》", err);
+    });
+};
+// 点击查询坐标
+const worm = (item) => {
+  if(finish.value==false){
+      updateProgress(item);
+  }else{
+    finish.value = false
+    gressWidth.value = 0
+    updateProgress(item);
+  }
+
+};
+// 进度条
+const updateProgress = (item) => {
+  console.log("item>>>",item);
+  
+  localStorage.setItem("item", JSON.stringify(item));
+  const interval = setInterval(() => {
+    gressWidth.value += 1; // 更新响应式数据
+    if (gressWidth.value >= 100) {
+      finish.value = true;
+      clearInterval(interval);
+      nextTick(() => {
+        initThreeJs();
+        setTimeout(() => {
+          updateGridColor(item);
+        }, 1000);
+      });
+      // updateGridColor(45)
+    }
+  }, 100);
+};
+
 // Mint Point 功能
 const solMintPoint = async () => {
   try {
@@ -548,8 +627,8 @@ const solMintPoint = async () => {
     try {
       const accountData = await program.account.dataAccount.fetch(pdaAccount);
       console.log("PDA Account Data:", JSON.stringify(accountData, null, 2));
-      let num = JSON.stringify(accountData, null, 2);
-      fragment.value = fragment.value + num.amount;
+      let num = JSON.parse(JSON.stringify(accountData, null, 2));
+      fragment.value = fragment.value + num.amount * 1;
     } catch (error) {
       console.log("PDA account data not found or error:", error);
     }
@@ -648,7 +727,18 @@ const solMintPoint = async () => {
 };
 
 // 组件挂载
-onMounted(() => {
+onMounted(async () => {
+  try {
+    const phantomWallet = walletService.getPhantomWallet();
+    if (phantomWallet?.isConnected) {
+      await phantomWallet.disconnect();
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    }
+    await walletService.connectWallet();
+    // await updateTokenBalance();
+  } catch (error) {
+    console.error("Wallet initialization error:", error);
+  }
   // 设置钱包回调
   walletService.setCallbacks({
     onConnect: async (connectedWallet) => {
@@ -663,6 +753,7 @@ onMounted(() => {
       walletAddress.value = "";
       balance.value = 0;
       wallet.value = null;
+      fragment.value = 0;
       tokenBalance.value = 0;
     },
   });
@@ -670,13 +761,17 @@ onMounted(() => {
   // 初始化钱包监听
   walletService.initWalletListeners();
 
-  if (finish.value) {
-    initThreeJs();
-  }
+  // if (finish.value) {
+  // initThreeJs();
+  // }
 });
 
 // 组件卸载时清理
 onUnmounted(() => {
+  const phantomWallet = walletService.getPhantomWallet();
+  if (phantomWallet?.isConnected) {
+    phantomWallet.disconnect();
+  }
   walletService.cleanup();
 });
 
@@ -704,13 +799,12 @@ const initThreeJs = () => {
   renderer.setSize(elements.clientWidth, elements.clientHeight);
   renderer.setClearColor(0x000000, 0);
 
-  if (threeJsContainer.value) {
-    threeJsContainer.value.appendChild(renderer.domElement);
-  }
+  // if (threeJsContainer.value) {
+  threeJsContainer.value.appendChild(renderer.domElement);
+  // }
 
   gridGroup = new THREE.Group();
   scene.add(gridGroup);
-
   createGrid();
 
   window.addEventListener("click", onCanvasClick);
@@ -744,6 +838,8 @@ const receivePoint = () => {
       if (res.code == 200) {
         // 调用 mintPoint 函数
         solMintPoint();
+      } else {
+        showToast(res.error);
       }
     })
     .catch((err) => {
@@ -991,7 +1087,6 @@ const receivePoint = () => {
           box-sizing: border-box;
           overflow: auto;
           color: #ffffff;
-          font-size: 16px;
         }
 
         .fenye {

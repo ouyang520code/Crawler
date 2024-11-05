@@ -10,7 +10,7 @@ import { parse } from "vue/compiler-sfc";
 
 // 创建一个 Axios 实例
 const request = axios.create({
-  baseURL: "http://localhost:5173/", // 设置基础 URL，根据您的实际情况进行修改
+  baseURL: "http://www.qipancong.xyz:8000/", // 设置基础 URL，根据您的实际情况进行修改
   timeout: 5000, // 设置请求超时时间，单位为毫秒
 });
 // 请求拦截器

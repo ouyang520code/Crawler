@@ -12,8 +12,13 @@
       <div class="btn">确认</div>
     </div>
     <div class="info">
-      <span>地址：点击撒娇大开杀戒啊大家撒科技</span>
-      <div>NFT：<span>已产生</span></div>
+      <span>地址：{{ walletAddress }}</span>
+      <div>
+        NFT：{{ balance
+        }}<span style="margin-left: 10px">{{
+          balance > 0 ? "已产生" : "未产生"
+        }}</span>
+      </div>
     </div>
     <div class="synthesis">
       <div class="left">
@@ -25,7 +30,7 @@
       <div class="right">
         <img src="../../assets/img/zhuan1.png" alt="" />
         <div class="num">
-          <span class="sui">112</span>
+          <span class="sui">{{ fragment }}</span>
           <span class="content">碎片数量</span>
         </div>
         <div class="inpt_bi">
@@ -45,18 +50,19 @@
     </div>
   </div>
 </template>
-<script setup>
-import { ref,onMounted, onUnmounted } from "vue";
+<script setup lang="ts">
+import { ref, onMounted, onUnmounted } from "vue";
 import { Program } from "@project-serum/anchor";
+import * as anchor from "@project-serum/anchor";
 import { PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
-import { 
-  TOKEN_PROGRAM_ID, 
-  getAssociatedTokenAddress, 
+import {
+  TOKEN_PROGRAM_ID,
+  getAssociatedTokenAddress,
   ASSOCIATED_TOKEN_PROGRAM_ID,
-  createAssociatedTokenAccountInstruction
+  createAssociatedTokenAccountInstruction,
 } from "@solana/spl-token";
 import { walletService } from "@/utils/wallet";
-import { 
+import {
   PROGRAM_ID,
   MASTER_EDITION_INFO,
   SYSVAR_INSTRUCTIONS,
@@ -66,18 +72,32 @@ import {
   METADATA_INFO,
   MASTER_METADATA,
   MINT_NFT_AMOUNT,
-  TOKEN_MINT
+  TOKEN_MINT,
+  EDITION_MARKER_SEED,
+  MINT_INFO,
 } from "@/utils/constants";
-import BN from 'bn.js'
+import BN from "bn.js";
 import { IDL } from "@/idl/idl";
-import { showToast, showLoadingToast, closeToast, showSuccessToast } from "vant";
-
+import {
+  showToast,
+  showLoadingToast,
+  closeToast,
+  showSuccessToast,
+} from "vant";
+import $apis from "@/networks/apis";
+import { version } from "process";
 
 const value1 = ref("");
 const value2 = ref("");
 const loading = ref(false);
 const status = ref("");
 const tokenBalance = ref(0);
+const walletAddress = ref("");
+const balance = ref(0);
+const wallet = ref<any>(null);
+const fragment = ref(0);
+const connected = ref(false);
+const vseison = ref('')
 
 // 获取代币余额
 const updateTokenBalance = async () => {
@@ -88,15 +108,16 @@ const updateTokenBalance = async () => {
       MASTER_EDITION_INFO
     );
   } catch (error) {
-    console.error('Error updating token balance:', error);
+    console.error("Error updating token balance:", error);
     tokenBalance.value = 0;
   }
 };
 
 // mintNft 功能
 const solMintNft = async () => {
-  if(value2.value==0||value2.value=='') return showToast("请输入兑换数量")
-  const amount = new BN(100*value2.value)
+  if (value2.value == 0 || value2.value == "")
+    return showToast("请输入兑换数量");
+  const amount = new BN(100 * value2.value);
 
   try {
     if (!walletService.wallet) {
@@ -109,7 +130,7 @@ const solMintNft = async () => {
     loading.value = true;
     showLoadingToast({
       message: "正在 Mint NFT...",
-      forbidClick: true
+      forbidClick: true,
     });
 
     const provider = walletService.getProvider(walletService.wallet);
@@ -118,8 +139,11 @@ const solMintNft = async () => {
     }
 
     // Get token account using the connected wallet
-    const tokenAccount = await walletService.getUserTokenAccount(MASTER_EDITION_INFO);
-    
+    const tokenAccount = await walletService.getUserTokenAccount(
+      MASTER_EDITION_INFO
+    );
+    const userTokenAccount = await walletService.getUserTokenAccount(MINT_INFO);
+
     const program = new Program(IDL, PROGRAM_ID, provider);
 
     // 获取 PDA 账户
@@ -128,18 +152,40 @@ const solMintNft = async () => {
       program.programId
     );
 
+    // 获取 adminPDA 账户
+    const [adminPad] = PublicKey.findProgramAddressSync(
+      [Buffer.from("adminGlobal")],
+      program.programId
+    );
+    console.log("adminPDA", adminPad.toString());
+
+    // // 获取 adminPDA 账户数据
+    try {
+      const accountData = await program.account.admin.fetch(adminPad);
+      console.log("PDA Account Data:", JSON.stringify(accountData, null, 2));
+      vseison.value = JSON.parse(JSON.stringify(accountData, null, 2)).editionNumber
+    } catch (error) {
+      console.log("PDA account data not found or error:", error);
+    }
+
     // 获取 Point PDA
     const [pointPDA] = PublicKey.findProgramAddressSync(
       [Buffer.from(POINT_SEED)],
       program.programId
     );
-
+    // 生成 editionMarkerpda PDA
+    const [editionMarkerpda] = PublicKey.findProgramAddressSync(
+      [Buffer.from(EDITION_MARKER_SEED)],
+      program.programId
+    );
     // 检查 PDA 账户是否存在
-    const accountInfo = await walletService.getConnection().getAccountInfo(pdaAccount);
-    
+    const accountInfo = await walletService
+      .getConnection()
+      .getAccountInfo(pdaAccount);
+
     // 构建交易指令
     const instructions = [];
-    
+
     // 如果 PDA 账户不存在，添加初始化指令
     if (!accountInfo) {
       instructions.push(
@@ -148,27 +194,46 @@ const solMintNft = async () => {
           .accounts({
             user: provider.wallet.publicKey,
             pdaAccount: pdaAccount,
-            systemProgram: SystemProgram.programId
+            systemProgram: SystemProgram.programId,
           })
           .instruction()
       );
     }
 
     try {
+      // 生成 Metadata PDA
+      const [editionMetadata] = PublicKey.findProgramAddressSync(
+        [
+          Buffer.from("metadata"),
+          TOKEN_METADATA_PROGRAM_ID.toBuffer(),
+          MASTER_EDITION_INFO.toBuffer(),
+        ],
+        TOKEN_METADATA_PROGRAM_ID
+      );
+      // 生成 Edition PDA
+      const [edition] = PublicKey.findProgramAddressSync(
+        [
+          Buffer.from("metadata"),
+          TOKEN_METADATA_PROGRAM_ID.toBuffer(),
+          MASTER_EDITION_INFO.toBuffer(),
+          Buffer.from("edition"),
+        ],
+        TOKEN_METADATA_PROGRAM_ID
+      );
       // 添加 mintNft 指令
       const tx = await program.methods
-        .mintNft(MINT_NFT_AMOUNT.EDITION_NUMBER,amount)
+        .mintNft(new BN(vseison.value), amount)
         .accounts({
           pdaAccount: pdaAccount,
           metaplexTokenMetadata: TOKEN_METADATA_PROGRAM_ID,
-          editionMetadata: METADATA_INFO,
-          edition: MASTER_EDITION_INFO,
+          editionMetadata: editionMetadata,
+          edition: edition,
           editionMint: MASTER_EDITION_INFO,
           editionTokenAccountOwner: provider.wallet.publicKey,
           editionTokenAccount: tokenAccount.address,
           editionMintAuthority: provider.wallet.publicKey,
           masterEdition: MASTER_EDITION_INFO,
-          editionMarkerPda: pointPDA,
+          editionMarkerPda: editionMarkerpda,
           payer: provider.wallet.publicKey,
           masterTokenAccountOwner: provider.wallet.publicKey,
           masterTokenAccount: tokenAccount.address,
@@ -178,40 +243,41 @@ const solMintNft = async () => {
           splAtaProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
           sysvarInstructions: SYSVAR_INSTRUCTIONS,
           systemProgram: SystemProgram.programId,
-          tokenMint: TOKEN_MINT,
-          userTokenAccount: tokenAccount.address,
-          adminData: pdaAccount,
+          tokenMint: MINT_INFO,
+          // userTokenAccount: tokenAccount.address,
+          userTokenAccount: userTokenAccount.address,
+          adminData: adminPad,
         })
         .instruction();
 
       // 创建交易
       const transaction = new Transaction();
       transaction.add(tx);
-      transaction.recentBlockhash = (await walletService.getConnection().getLatestBlockhash()).blockhash;
+      transaction.recentBlockhash = (
+        await walletService.getConnection().getLatestBlockhash()
+      ).blockhash;
       transaction.feePayer = provider.wallet.publicKey;
 
       // 发送交易
       const signature = await provider.wallet.signTransaction(transaction);
-
       // 打印交易签名
       console.log("Transaction Signature", signature);
-      
+
       status.value = `Mint NFT 成功！交易ID: ${signature}`;
       showSuccessToast("Mint NFT 成功！");
-
+      getInfo();
     } catch (error) {
-      console.error('Mint NFT error:', error);
+      console.error("Mint NFT error:", error);
       if (error instanceof Error) {
         status.value = `错误: ${error.message}`;
         showToast(error.message);
       } else {
-        status.value = '发生未知错误';
-        showToast('发生未知错误');
+        status.value = "发生未知错误";
+        showToast("发生未知错误");
       }
     }
-
   } catch (error) {
-    console.error('Mint NFT error:', error);
+    console.error("Mint NFT error:", error);
     if (!walletService.isUserRejection(error)) {
       showToast(error instanceof Error ? error.message : "Mint NFT 失败");
     }
@@ -220,6 +286,38 @@ const solMintNft = async () => {
     closeToast();
   }
 };
+// 更新钱包信息
+const updateWalletInfo = async () => {
+  if (!wallet.value?.publicKey) return;
+  try {
+    walletAddress.value = wallet.value.publicKey.toString();
+    // balance.value = await walletService.getSolBalance(wallet.value.publicKey);
+    if (walletAddress.value.length > 0) {
+      // getaddress();
+      getInfo();
+    }
+    tokenBalance.value = await walletService.getTokenBalance(
+      wallet.value.publicKey
+    );
+  } catch (error) {
+    console.error("获取钱包信息失败:", error);
+  }
+};
+//查询用户信息
+const getInfo = () => {
+  $apis
+    .getUserinfo({ address: walletAddress.value })
+    .then((res) => {
+      if (res.code == 200) {
+        console.log("res>>>用户信息", res);
+        fragment.value = res.data.all_point;
+        balance.value = res.data.node_success;
+      }
+    })
+    .catch((err) => {
+      console.log("err>>>用户信息", err);
+    });
+};
 
 // 组件挂载时初始化钱包连接
 onMounted(async () => {
@@ -227,13 +325,32 @@ onMounted(async () => {
     const phantomWallet = walletService.getPhantomWallet();
     if (phantomWallet?.isConnected) {
       await phantomWallet.disconnect();
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
     }
     await walletService.connectWallet();
     await updateTokenBalance();
   } catch (error) {
-    console.error('Wallet initialization error:', error);
+    console.error("Wallet initialization error:", error);
   }
+  // 设置钱包回调
+  walletService.setCallbacks({
+    onConnect: async (connectedWallet) => {
+      console.log("钱包已连接");
+      wallet.value = connectedWallet;
+      connected.value = true;
+      await updateWalletInfo();
+    },
+    onDisconnect: () => {
+      console.log("钱包已断开连接");
+      walletAddress.value = "";
+      balance.value = 0;
+      fragment.value = 0;
+      tokenBalance.value = 0;
+    },
+  });
+
+  // 初始化钱包监听
+  walletService.initWalletListeners();
 });
 
 // 组件卸载时清理
@@ -242,8 +359,8 @@ onUnmounted(() => {
   if (phantomWallet?.isConnected) {
     phantomWallet.disconnect();
   }
+  walletService.cleanup();
 });
-
 </script>
 <style lang="less" scoped>
 @import url("@/assets/less/global.less");
@@ -378,7 +495,7 @@ onUnmounted(() => {
           margin-top: 10px;
         }
       }
-      .inpt_bi{
+      .inpt_bi {
         width: 100%;
         height: 76px;
       }
@@ -508,7 +625,7 @@ onUnmounted(() => {
             margin-top: 5px;
           }
         }
-        .inpt_bi{
+        .inpt_bi {
           width: 100%;
           height: 65px;
         }
@@ -517,23 +634,23 @@ onUnmounted(() => {
           height: 65px;
           font-size: 16px;
         }
-        .huan{
+        .huan {
           width: 28px;
           height: 38px;
           margin-top: 30px;
         }
-        .huo{
+        .huo {
           margin-top: 20px;
-          img{
+          img {
             width: 78px;
             height: 55px;
           }
-          span{
+          span {
             font-size: 18px;
             margin-top: 10px;
           }
         }
-        .sure{
+        .sure {
           width: 95%;
           height: 48px;
           font-size: 24px;
