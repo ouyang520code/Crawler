@@ -3,6 +3,8 @@ import { AnchorProvider } from '@project-serum/anchor'
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-phantom'
 import { TOKEN_MINT } from './constants'
 import { getAssociatedTokenAddress } from "@solana/spl-token";
+import { createAssociatedTokenAccountInstruction } from "@solana/spl-token";
+import { Transaction } from "@solana/web3.js";
 
 // 导出钱包适配器
 export const wallets = [
@@ -78,21 +80,38 @@ export class WalletService {
   }
 
   // 获取代币余额
-  async getTokenBalance(owner) {
+  async getTokenBalance(owner, mint = TOKEN_MINT) {
     try {
-      const tokenAccounts = await this.connection.getParsedTokenAccountsByOwner(
-        owner,
-        { mint: TOKEN_MINT }
-      )
-      
-      if (tokenAccounts.value.length > 0) {
-        const tokenAccountInfo = tokenAccounts.value[0].account.data.parsed.info.tokenAmount
-        return tokenAccountInfo.uiAmount
+      if (!owner) {
+        console.warn('No owner provided for getTokenBalance');
+        return 0;
       }
-      return 0
+
+      // 验证 mint 地址
+      if (!mint) {
+        console.warn('No mint address provided for getTokenBalance');
+        return 0;
+      }
+
+      // 获取用户代币账户
+      const tokenAccount = await this.getUserTokenAccount(mint);
+      if (!tokenAccount.exists || !tokenAccount.address) {
+        return 0;
+      }
+
+      // 获取代币余额
+      try {
+        const accountInfo = await this.connection.getTokenAccountBalance(tokenAccount.address);
+        return accountInfo.value.uiAmount || 0;
+      } catch (error) {
+        console.error('Error getting token balance:', error);
+        return 0;
+      }
+
     } catch (error) {
-      console.error('Error getting token balance:', error)
-      return 0
+      console.error('Error getting token balance:', error);
+      // 对于任何错误，返回0而不是抛出错误
+      return 0;
     }
   }
 
@@ -178,22 +197,42 @@ export class WalletService {
    * Gets or creates the user's associated token account
    * @returns {Promise<{address: PublicKey}>} The token account address
    */
-  async getUserTokenAccount() {
+  async getUserTokenAccount(mint = TOKEN_MINT) {
     if (!this.wallet?.publicKey) {
       throw new Error("Wallet not connected");
     }
 
     try {
-      const tokenAccountAddress = await getAssociatedTokenAddress(
-        TOKEN_MINT,
+      // 获取用户代币账户地址
+      const userTokenAccount = await getAssociatedTokenAddress(
+        mint,
         this.wallet.publicKey
       );
 
+      // 检查代币账户是否存在
+      const tokenAccountInfo = await this.connection.getAccountInfo(userTokenAccount);
+
+      // 如果代币账户不存在，返回地址和存在状态
+      if (!tokenAccountInfo) {
+        return {
+          address: userTokenAccount,
+          exists: false
+        };
+      }
+
       return {
-        address: tokenAccountAddress
+        address: userTokenAccount,
+        exists: true
       };
     } catch (error) {
       console.error("Error getting user token account:", error);
+      // 如果是资源不可用错误，返回 null 地址
+      if (error.message?.includes('Requested resource not available')) {
+        return {
+          address: null,
+          exists: false
+        };
+      }
       throw error;
     }
   }

@@ -13,7 +13,12 @@
     </div>
     <div class="info">
       <span>地址：{{ walletAddress }}</span>
-      <div>NFT：{{ balance }}<span style="margin-left: 10px">{{balance>0?"已产生":"未产生"}}</span></div>
+      <div>
+        NFT：{{ balance
+        }}<span style="margin-left: 10px">{{
+          balance > 0 ? "已产生" : "未产生"
+        }}</span>
+      </div>
     </div>
     <div class="product">
       <div class="pro_left" v-if="finish">
@@ -60,7 +65,7 @@
           </div>
         </div>
         <div class="sui">
-          当前产生的NFT碎片：<span>800</span>
+          当前产生的NFT碎片：<span>{{ fragment }}</span>
           <img src="../../assets/img/zhuan.png" alt="" />
         </div>
         <div class="linqu" @click="receivePoint">
@@ -126,7 +131,6 @@ declare module "three" {
     geometry?: THREE.BufferGeometry;
   }
 }
-
 // 状态变量
 const value1 = ref("");
 const value2 = ref("");
@@ -145,7 +149,7 @@ const status = ref("");
 const walletBalance = ref(0);
 const tokenBalance = ref(0);
 const coordinate = ref([]);
-const is_use = ref(0)
+const fragment = ref(0);
 
 // THREE.js 相关变量声明
 let scene: THREE.Scene & { position: THREE.Vector3 };
@@ -267,10 +271,12 @@ const animate = () => {
 // 更新钱包信息
 const updateWalletInfo = async () => {
   if (!wallet.value?.publicKey) return;
-
   try {
     walletAddress.value = wallet.value.publicKey.toString();
     // balance.value = await walletService.getSolBalance(wallet.value.publicKey);
+    if (walletAddress.value.length > 0) {
+      getInfo();
+    }
     tokenBalance.value = await walletService.getTokenBalance(
       wallet.value.publicKey
     );
@@ -426,6 +432,21 @@ const buyNode = async () => {
     status.value = "";
   }
 };
+//查询用户信息
+const getInfo = () => {
+  $apis
+    .getUserinfo({ address: walletAddress.value })
+    .then((res) => {
+      if (res.code == 200) {
+        console.log("res>>>用户信息", res);
+
+        balance.value = res.data.node_success;
+      }
+    })
+    .catch((err) => {
+      console.log("err>>>用户信息", err);
+    });
+};
 // 查询tx坐标
 const getchaxun = (tx) => {
   $apis
@@ -438,8 +459,8 @@ const getchaxun = (tx) => {
       if (res.code == 200) {
         closeToast();
         coordinate.value = res.data;
-        is_use.value = res.data[0].is_use
-        getProduce(is_use.value)
+        // is_use.value = res.data[0].is_use
+        // getProduce(is_use.value)
         console.log("res>>>", res);
       }
     })
@@ -449,37 +470,48 @@ const getchaxun = (tx) => {
     });
 };
 // 查询是否已产出
-const getProduce=(type)=>{
-  $apis.getnodedata({address:walletAddress.value,state:type,page:number.value,limit:10}).then((res)=>{
-    if(res.code==200){
-      balance.value = res.data.balance??0
-    }
-  }).catch((err)=>{
-
-  })
-}
-getProduce(0)
+const getProduce = (type) => {
+  $apis
+    .getnodedata({
+      address: walletAddress.value,
+      state: type,
+      page: number.value,
+      limit: 10,
+    })
+    .then((res) => {
+      if (res.code == 200) {
+        balance.value = res.data.balance ?? 0;
+      }
+    })
+    .catch((err) => {});
+};
 //利用地址查询存在的坐标
-const getaddress = ()=>{
-  $apis.getAddressdinate({address:walletAddress.value,page:number.value,limit:10}).then((res)=>{
-    if(res.code==200){
-      console.log("res地址查询坐标>>>",res);
-    }else{
-      showToast("查询失败")
-      console.log("res失败>>",res);
-      
-    }
-  }).catch((err)=>{
-    showToast("查询失败")
-    console.log("err地址查询坐标>>>",err);
-    
-  })
-}
+const getaddress = () => {
+  $apis
+    .getAddressdinate({
+      address: walletAddress.value,
+      page: number.value,
+      limit: 10,
+    })
+    .then((res) => {
+      if (res.code == 200) {
+        console.log("res地址查询坐标>>>", res);
+      } else {
+        showToast("查询失败");
+        console.log("res失败>>", res);
+      }
+    })
+    .catch((err) => {
+      showToast("查询失败");
+      console.log("err地址查询坐标>>>", err);
+    });
+};
 // 查询确认
-const queryaddress = ()=>{
-  if(value1.value=='') return showToast('请输入地址')
-  getaddress()
-}
+const queryaddress = () => {
+  if (value1.value == "") return showToast("请输入地址");
+  if(value1.value!=walletAddress.value) return showToast("请输入正确的地址")
+  getaddress();
+};
 // Mint Point 功能
 const solMintPoint = async () => {
   try {
@@ -511,6 +543,16 @@ const solMintPoint = async () => {
       program.programId
     );
     console.log("PDA account:", pdaAccount.toString());
+
+    // 获取 PDA 账户数据
+    try {
+      const accountData = await program.account.dataAccount.fetch(pdaAccount);
+      console.log("PDA Account Data:", JSON.stringify(accountData, null, 2));
+      let num = JSON.stringify(accountData, null, 2);
+      fragment.value = fragment.value + num.amount;
+    } catch (error) {
+      console.log("PDA account data not found or error:", error);
+    }
 
     // 获取 Point PDA
     const [pointPDA] = PublicKey.findProgramAddressSync(
@@ -579,7 +621,6 @@ const solMintPoint = async () => {
       console.log("Transaction Signature", signature);
 
       status.value = `Mint Point 成功！交易ID: ${signature}`;
-
     } catch (error) {
       console.error("Mint Point error:", error);
       if (error instanceof Error) {
@@ -681,16 +722,16 @@ const initThreeJs = () => {
 // 其他函数保持不变...
 const add = () => {
   number.value += 1;
-  if(coordinate.value.length!=0){
-    getaddress()
+  if (coordinate.value.length != 0) {
+    getaddress();
   }
 };
 
 const reduce = () => {
   if (number.value === 1) return;
   number.value -= 1;
-   if(coordinate.value.length!=0){
-    getaddress()
+  if (coordinate.value.length != 0) {
+    getaddress();
   }
 };
 

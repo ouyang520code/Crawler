@@ -40,16 +40,210 @@
           <img src="../../assets/img/num.png" alt="" />
           <span>获得数量</span>
         </div>
-        <div class="sure">确认</div>
+        <div class="sure" @click="solMintNft">确认</div>
       </div>
     </div>
   </div>
 </template>
 <script setup>
-import { ref } from "vue";
+import { ref,onMounted, onUnmounted } from "vue";
+import { Program } from "@project-serum/anchor";
+import { PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
+import { 
+  TOKEN_PROGRAM_ID, 
+  getAssociatedTokenAddress, 
+  ASSOCIATED_TOKEN_PROGRAM_ID,
+  createAssociatedTokenAccountInstruction
+} from "@solana/spl-token";
+import { walletService } from "@/utils/wallet";
+import { 
+  PROGRAM_ID,
+  MASTER_EDITION_INFO,
+  SYSVAR_INSTRUCTIONS,
+  DATA_SEED,
+  POINT_SEED,
+  TOKEN_METADATA_PROGRAM_ID,
+  METADATA_INFO,
+  MASTER_METADATA,
+  MINT_NFT_AMOUNT,
+  TOKEN_MINT
+} from "@/utils/constants";
+import BN from 'bn.js'
+import { IDL } from "@/idl/idl";
+import { showToast, showLoadingToast, closeToast, showSuccessToast } from "vant";
+
 
 const value1 = ref("");
-const value2 = ref("")
+const value2 = ref("");
+const loading = ref(false);
+const status = ref("");
+const tokenBalance = ref(0);
+
+// 获取代币余额
+const updateTokenBalance = async () => {
+  try {
+    if (!walletService.wallet?.publicKey) return;
+    tokenBalance.value = await walletService.getTokenBalance(
+      walletService.wallet.publicKey,
+      MASTER_EDITION_INFO
+    );
+  } catch (error) {
+    console.error('Error updating token balance:', error);
+    tokenBalance.value = 0;
+  }
+};
+
+// mintNft 功能
+const solMintNft = async () => {
+  if(value2.value==0||value2.value=='') return showToast("请输入兑换数量")
+  const amount = new BN(100*value2.value)
+
+  try {
+    if (!walletService.wallet) {
+      await walletService.connectWallet();
+      if (!walletService.wallet) {
+        throw new Error("请先连接钱包");
+      }
+    }
+
+    loading.value = true;
+    showLoadingToast({
+      message: "正在 Mint NFT...",
+      forbidClick: true
+    });
+
+    const provider = walletService.getProvider(walletService.wallet);
+    if (!provider) {
+      throw new Error("未找到钱包提供者");
+    }
+
+    // Get token account using the connected wallet
+    const tokenAccount = await walletService.getUserTokenAccount(MASTER_EDITION_INFO);
+    
+    const program = new Program(IDL, PROGRAM_ID, provider);
+
+    // 获取 PDA 账户
+    const [pdaAccount] = PublicKey.findProgramAddressSync(
+      [Buffer.from(DATA_SEED), provider.wallet.publicKey.toBuffer()],
+      program.programId
+    );
+
+    // 获取 Point PDA
+    const [pointPDA] = PublicKey.findProgramAddressSync(
+      [Buffer.from(POINT_SEED)],
+      program.programId
+    );
+
+    // 检查 PDA 账户是否存在
+    const accountInfo = await walletService.getConnection().getAccountInfo(pdaAccount);
+    
+    // 构建交易指令
+    const instructions = [];
+    
+    // 如果 PDA 账户不存在，添加初始化指令
+    if (!accountInfo) {
+      instructions.push(
+        await program.methods
+          .initUserData()
+          .accounts({
+            user: provider.wallet.publicKey,
+            pdaAccount: pdaAccount,
+            systemProgram: SystemProgram.programId
+          })
+          .instruction()
+      );
+    }
+
+    try {
+      // 添加 mintNft 指令
+      const tx = await program.methods
+        .mintNft(MINT_NFT_AMOUNT.EDITION_NUMBER,amount)
+        .accounts({
+          pdaAccount: pdaAccount,
+          metaplexTokenMetadata: TOKEN_METADATA_PROGRAM_ID,
+          editionMetadata: METADATA_INFO,
+          edition: MASTER_EDITION_INFO,
+          editionMint: MASTER_EDITION_INFO,
+          editionTokenAccountOwner: provider.wallet.publicKey,
+          editionTokenAccount: tokenAccount.address,
+          editionMintAuthority: provider.wallet.publicKey,
+          masterEdition: MASTER_EDITION_INFO,
+          editionMarkerPda: pointPDA,
+          payer: provider.wallet.publicKey,
+          masterTokenAccountOwner: provider.wallet.publicKey,
+          masterTokenAccount: tokenAccount.address,
+          masterMetadata: MASTER_METADATA,
+          updateAuthority: pointPDA,
+          splTokenProgram: TOKEN_PROGRAM_ID,
+          splAtaProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+          sysvarInstructions: SYSVAR_INSTRUCTIONS,
+          systemProgram: SystemProgram.programId,
+          tokenMint: TOKEN_MINT,
+          userTokenAccount: tokenAccount.address,
+          adminData: pdaAccount,
+        })
+        .instruction();
+
+      // 创建交易
+      const transaction = new Transaction();
+      transaction.add(tx);
+      transaction.recentBlockhash = (await walletService.getConnection().getLatestBlockhash()).blockhash;
+      transaction.feePayer = provider.wallet.publicKey;
+
+      // 发送交易
+      const signature = await provider.wallet.signTransaction(transaction);
+
+      // 打印交易签名
+      console.log("Transaction Signature", signature);
+      
+      status.value = `Mint NFT 成功！交易ID: ${signature}`;
+      showSuccessToast("Mint NFT 成功！");
+
+    } catch (error) {
+      console.error('Mint NFT error:', error);
+      if (error instanceof Error) {
+        status.value = `错误: ${error.message}`;
+        showToast(error.message);
+      } else {
+        status.value = '发生未知错误';
+        showToast('发生未知错误');
+      }
+    }
+
+  } catch (error) {
+    console.error('Mint NFT error:', error);
+    if (!walletService.isUserRejection(error)) {
+      showToast(error instanceof Error ? error.message : "Mint NFT 失败");
+    }
+  } finally {
+    loading.value = false;
+    closeToast();
+  }
+};
+
+// 组件挂载时初始化钱包连接
+onMounted(async () => {
+  try {
+    const phantomWallet = walletService.getPhantomWallet();
+    if (phantomWallet?.isConnected) {
+      await phantomWallet.disconnect();
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+    await walletService.connectWallet();
+    await updateTokenBalance();
+  } catch (error) {
+    console.error('Wallet initialization error:', error);
+  }
+});
+
+// 组件卸载时清理
+onUnmounted(() => {
+  const phantomWallet = walletService.getPhantomWallet();
+  if (phantomWallet?.isConnected) {
+    phantomWallet.disconnect();
+  }
+});
+
 </script>
 <style lang="less" scoped>
 @import url("@/assets/less/global.less");
