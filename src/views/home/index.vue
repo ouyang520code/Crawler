@@ -6,17 +6,17 @@
         v-model="value1"
         label=""
         left-icon="search"
-        placeholder="请输入...."
+        :placeholder="t('home.input')"
         :center="true"
       />
-      <div class="btn" @click="queryaddress" style="cursor: pointer;">确认</div>
+      <div class="btn" @click="queryaddress" style="cursor: pointer">{{t("home.sure")}}</div>
     </div>
     <div class="info">
-      <span>地址：{{ walletAddress }}</span>
+      <span>{{t("home.address")}}：{{ walletAddress }}</span>
       <div>
         NFT：{{ balance
         }}<span style="margin-left: 10px">{{
-          balance > 0 ? "已产生" : "未产生"
+          balance > 0 ? t("home.production") : t("home.ispro")
         }}</span>
       </div>
     </div>
@@ -25,8 +25,8 @@
         <div ref="threeJsContainer" class="three-js-container"></div>
         <div class="my-class-name">
           <div class="address">
-            <span>坐标信息：{{ zuobiao }}</span>
-            <span>哈希：{{ hanshu }}</span>
+            <span>{{t("home.Coordinate")}}：{{ zuobiao }}</span>
+            <span>{{t("home.hash")}}：{{ hanshu }}</span>
           </div>
         </div>
       </div>
@@ -40,41 +40,41 @@
         <img src="../../assets/img/logo.png" alt="" />
       </div>
       <div class="pro_right">
-        <span>爬虫工作</span>
+        <span>{{t("home.gongzuo")}}</span>
         <div class="daibi">
           <van-field
             v-model="inputAmount"
-            placeholder="请输入代币"
+            :placeholder="t('home.token')"
             :center="true"
           />
-          <div class="mint" @click="buyNode">确认</div>
+          <div class="mint" @click="buyNode">{{t("home.sure")}}</div>
         </div>
         <div class="ruzhu">
-          <text>入住节点信息</text>
+          <text>{{t('home.node')}}</text>
           <div class="miaoshu">
             <span
               v-for="(item, index) in coordinate"
               :key="index"
               style="font-size: 16px; cursor: pointer"
               @click="worm(item)"
-              >坐标：{{ item.x }} + {{ item.y }}</span
+              >{{t("home.zuobiao")}}：{{ item.x }} + {{ item.y }}</span
             >
           </div>
           <div class="fenye">
             <img src="../../assets/img/left.png" alt="" @click="reduce" />
             <spna style="color: #813dff; font-size: 16px">
-              {{ number }} / 页</spna
+              {{ number }} / {{t("home.page")}}</spna
             >
             <img src="../../assets/img/right.png" alt="" @click="add" />
           </div>
         </div>
         <div class="sui">
-          当前产生的NFT碎片：<span>{{ fragment }}</span>
+          {{t("home.fragments")}}：<span>{{ fragment }}</span>
           <img src="../../assets/img/zhuan.png" alt="" />
         </div>
-        <div class="linqu" @click="solMintPoint">
+        <div class="linqu" @click="receivePoint">
           <img src="../../assets/img/zhuan.png" alt="" />
-          领取碎片
+          {{t('home.Collect')}}
         </div>
       </div>
     </div>
@@ -90,6 +90,7 @@ import {
   PublicKey,
   SystemProgram,
   Transaction,
+  Keypair,
 } from "@solana/web3.js";
 import { Program, AnchorProvider, Idl } from "@project-serum/anchor";
 import { walletService } from "@/utils/wallet";
@@ -114,7 +115,9 @@ import BN from "bn.js";
 import { IDL } from "@/idl/idl";
 import $apis from "@/networks/apis";
 import { showLoadingToast, closeToast, showToast } from "vant";
+import { useI18n } from "vue-i18n";
 
+const { t } = useI18n();
 // 添加 window.solana 类型声明
 declare global {
   interface Window {
@@ -369,7 +372,7 @@ const buyNode = async () => {
     });
     const provider = getProvider();
     if (!provider) {
-      showToast("未找到钱包提供者");
+      showToast("t('home.provider')");
       throw new Error("未找到钱包提供者");
     }
 
@@ -378,7 +381,7 @@ const buyNode = async () => {
       provider.wallet.publicKey
     );
     if (currentTokenBalance < Number(inputAmount.value)) {
-      showToast("代币余额不足");
+      showToast("t('home.balance')");
       throw new Error(
         `代币余额不足。当前余额: ${currentTokenBalance}，需要: ${inputAmount.value}`
       );
@@ -447,7 +450,7 @@ const buyNode = async () => {
       .queryTx({ txId: tx })
       .then((res) => {
         showLoadingToast({
-          message: "节点启动需要时间请耐心",
+          message: "t('home.success')",
           mask: true,
         });
         if (res.code == 200) {
@@ -457,7 +460,7 @@ const buyNode = async () => {
         }
       })
       .catch((err) => {
-        showToast("节点启动失败");
+        showToast("t('home.fail)");
         console.log("err>>>", err);
       });
     inputAmount.value = "";
@@ -589,13 +592,11 @@ const solMintPoint = async () => {
     if (!wallet.value) {
       await connectWallet();
       if (!wallet.value) {
-        throw new Error("请先连接钱包");
+        throw new Error("t(home.wallet)");
       }
     }
-
     loading.value = true;
     status.value = "正在 Mint Point...";
-
     const provider = getProvider();
     if (!provider) {
       throw new Error("未找到钱包提供者");
@@ -618,17 +619,14 @@ const solMintPoint = async () => {
       const accountData = await program.account.dataAccount.fetch(pdaAccount);
       console.log("PDA Account Data:", JSON.stringify(accountData, null, 2));
       let num = JSON.parse(JSON.stringify(accountData, null, 2));
-      if(num.amount<=0) return showToast('无可领取碎片')
+      if (num.amount <= 0) return showToast("t('home.linqu')");
       fragment.value = fragment.value + num.amount * 1;
     } catch (error) {
       console.log("PDA account data not found or error:", error);
     }
     // 获取 Point PDA
     const [pointPDA] = PublicKey.findProgramAddressSync(
-      [
-        Buffer.from("POINT"),
-        program.programId.toBuffer()
-      ],
+      [Buffer.from("POINT"), program.programId.toBuffer()],
       program.programId
     );
     console.log("Point PDA:", pointPDA.toString());
@@ -664,19 +662,24 @@ const solMintPoint = async () => {
           tokenInfo: tokenAccount.address,
           tokenOwnerInfo: provider.wallet.publicKey,
           // metadataInfo: METADATA_INFO,
-          metadataInfo: new PublicKey("55uh8C2y2MKoMpkkPQVHc8EymQ822M1eeYurTim1g5v4"),
+          metadataInfo: new PublicKey(
+            "55uh8C2y2MKoMpkkPQVHc8EymQ822M1eeYurTim1g5v4"
+          ),
           masterEditionInfo: MASTER_EDITION_INFO,
           tokenMetadataProgramInfo: TOKEN_METADATA_PROGRAM_ID,
           // mintInfo: MINT_INFO,
-          mintInfo: new PublicKey("3gQVUrzb5qWFsNppMWMVMPMaRkpDBqtH5RZHYaokoBdE"),
+          mintInfo: new PublicKey(
+            "3gQVUrzb5qWFsNppMWMVMPMaRkpDBqtH5RZHYaokoBdE"
+          ),
           updateAuthorityInfo: pointPDA,
           payerInfo: provider.wallet.publicKey,
           systemProgramInfo: new PublicKey("11111111111111111111111111111111"),
           sysvarInstructionsInfo: SYSVAR_INSTRUCTIONS,
           splTokenProgramInfo: TOKEN_PROGRAM_ID,
           splAtaProgramInfo: ASSOCIATED_TOKEN_PROGRAM_ID,
-        }).rpc()
-        // .instruction();
+        })
+        .rpc();
+      // .instruction();
       // 创建交易
       // const transaction = new Transaction();
       // transaction.add(tx);
@@ -686,7 +689,6 @@ const solMintPoint = async () => {
       // transaction.feePayer = provider.wallet.publicKey;
       // // 发送交易
       // const signature = await provider.wallet.signTransaction(transaction);
-    
 
       // 打印交易签名
       // console.log("Transaction Signature", signature);
@@ -823,23 +825,22 @@ const reduce = () => {
 
 // ... 其他 THREE.js 相关函数保持不变
 
-// const receivePoint = () => {
-//   $apis
-//     .mintPoint({ address: walletAddress.value })
-//     .then((res: any) => {
-//       // solMintPoint();
-//       if (res.code == 200) {
-//         // 调用 mintPoint 函数
-//         // solMintPoint();
-//       } else {
-//         showToast(res.error);
-//       }
-//     })
-//     .catch((err) => {
-//       // showToast(err.message)
-//       console.log("err>>", err);
-//     });
-// };
+const receivePoint = () => {
+  $apis
+    .mintPoint({ address: walletAddress.value })
+    .then((res: any) => {
+      if (res.code == 200) {
+        // 调用 mintPoint 函数
+        solMintPoint();
+      } else {
+        showToast(res.error);
+      }
+    })
+    .catch((err) => {
+      // showToast(err.message)
+      console.log("err>>", err);
+    });
+};
 </script>
 
 <style lang="less" scoped>
@@ -895,7 +896,8 @@ const reduce = () => {
 
   .info {
     width: 70%;
-    height: 119px;
+    min-height: 119px;
+    height: auto;
     border-radius: 5px;
     border: 1px solid #8a3dff;
     margin: 5% auto;
@@ -1124,10 +1126,9 @@ const reduce = () => {
         height: 70px;
         background-color: #813dff;
         display: flex;
-        justify-content: flex-start;
+        justify-content: center;
         align-items: center;
         color: white;
-        padding-left: 35%;
         margin-top: 15px;
         border-radius: 48px;
         font-size: 18px;
@@ -1173,7 +1174,8 @@ const reduce = () => {
 
     .info {
       width: 95%;
-      height: 78px;
+      min-height: 78px;
+      height: auto;
       border-radius: 5px;
       margin: 34% auto;
       span {
@@ -1324,7 +1326,6 @@ const reduce = () => {
 
         .linqu {
           height: 56px;
-          padding-left: 34%;
           font-size: 16px;
 
           img {

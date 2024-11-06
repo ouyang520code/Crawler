@@ -5,17 +5,17 @@
       <van-field
         v-model="value1"
         left-icon="search"
-        placeholder="请输入...."
-        center="true"
+        :placeholder="t('home.input')"
+        :center="true"
       />
-      <div class="btn">确认</div>
+      <div class="btn">{{t('home.sure')}}</div>
     </div>
     <div class="info">
-      <span>地址：{{ walletAddress }}</span>
+      <span>{{t('home.address')}}：{{ walletAddress }}</span>
       <div>
         NFT：{{ balance
         }}<span style="margin-left: 10px">{{
-          balance > 0 ? "已产生" : "未产生"
+          balance > 0 ? t("home.production") : t("home.ispro")
         }}</span>
       </div>
     </div>
@@ -24,8 +24,8 @@
       <div class="foote">
         <div class="box" v-for="(item, index) in rows" :key="index">
           <div class="box_head">
-            <span>哈希</span>
-            <span>坐标</span>
+            <span>{{t('home.hash')}}</span>
+            <span>{{t('home.zuobiao')}}</span>
           </div>
           <div class="box_list">
             <div class="list" v-for="(items, inde) in item" :key="index">
@@ -41,8 +41,8 @@
       <div style="font-size: 18px; color: #ffffff">ReptileSCAN</div>
       <div class="detail_list">
         <div class="phone_head">
-          <span>哈希</span>
-          <span>坐标</span>
+          <span>{{t('home.hash')}}</span>
+          <span>{{t('home.zuobiao')}}</span>
         </div>
         <div class="liushui" v-for="(item, index) in list" :key="index">
           <span>{{item.hash}}</span>
@@ -53,19 +53,22 @@
     <div class="pages">
       <div class="limit">
         <img src="../../assets/img/left.png" alt="" @click="reduce" />
-        <span>{{ currentPage }} / {{count}}页</span>
+        <span>{{ currentPage }} / {{count}}{{t('home.page')}}</span>
         <img src="../../assets/img/right.png" alt="" @click="add" />
       </div>
     </div>
   </div>
 </template>
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, registerRuntimeCompiler } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import $apis from "@/networks/apis";
 import { walletService } from "@/utils/wallet";
 import {
   showToast,
 } from "vant";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 const currentPage = ref(1);
 const list = ref([]);
 const tokenBalance = ref(0);
@@ -78,7 +81,7 @@ const rows = ref([]);
 const count = <any>ref('')
 
 const add = () => {
-  if(currentPage.value>count.value) return showToast("已经是最后一页")
+  if(currentPage.value>=count.value) return showToast("已经是最后一页")
   if(list.value.length==0) return showToast("暂无更多数据~")
   currentPage.value += 1;
   getaddress();
@@ -99,7 +102,7 @@ const getaddress = () => {
     .then((res) => {
       if (res.code == 200) {
         let redcuo = res.data
-        if(redcuo.length==0) return showToast("暂无更多数据~")
+        if(redcuo.length==0) return showToast("t('detail.emtype')")
         count.value = res.count
         redcuo.forEach((item,index)=>{
            item.hash = item.tx.substring(0, 4) + "......" + item.tx.slice(-4);
@@ -109,12 +112,12 @@ const getaddress = () => {
         rows.value = chunkedArray();
         console.log("rows>>>", rows.value);
       } else {
-        showToast("查询失败");
+        showToast("t('detail.fial')");
         console.log("res失败>>", res);
       }
     })
     .catch((err) => {
-      showToast("查询失败");
+      showToast("t('detail.fial')");
       console.log("err地址查询坐标>>>", err);
     });
 };
@@ -256,7 +259,8 @@ onUnmounted(() => {
   }
   .info {
     width: 70%;
-    height: 119px;
+    min-height: 119px;
+    height: auto;
     border-radius: 5px;
     border: 1px solid #8a3dff;
     margin: 0 auto;
@@ -385,7 +389,8 @@ onUnmounted(() => {
     }
     .info {
       width: 92%;
-      height: 74px;
+      min-height: 74px;
+      height: auto;
       border-radius: 5px;
       margin: -14% auto;
       span {

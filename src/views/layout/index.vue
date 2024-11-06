@@ -16,14 +16,14 @@
           >
         </div>
         <div class="pc_left">
-          <div class="pc_lang">
+          <div class="pc_lang" @click="changeloca">
             <img src="../../assets/img/loca.png" alt="" class="jia" />
-            <span>简体中文</span>
+            <span>{{t("navbar.loca")}}</span>
             <img src="../../assets/img/xia.png" alt="" class="xia" />
           </div>
           <div class="qian">
-            <button @click="connectWallet" v-if="!connected">链接钱包</button>
-            <button @click="disconnectWallet" v-else>断开连接</button>
+            <button @click="connectWallet" v-if="!connected">{{t("navbar.link")}}</button>
+            <button @click="disconnectWallet" v-else>{{t("navbar.discount")}}</button>
           </div>
         </div>
       </div>
@@ -47,8 +47,8 @@
         </div>
         <div class="content">{{ names }}</div>
         <div class="nav_left">
-          <button @click="connectWallet" v-if="!connected">链接钱包</button>
-          <button @click="disconnectWallet" v-else>断开连接</button>
+          <button @click="connectWallet" v-if="!connected">{{t("navbar.link")}}</button>
+          <button @click="disconnectWallet" v-else>{{t("navbar.discount")}}</button>
         </div>
       </div>
       <div class="pop_nav" v-if="show">
@@ -92,30 +92,37 @@
   </div>
 </template>
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted,computed } from "vue";
 import { useRouter } from "vue-router";
 import { Connection, clusterApiUrl } from "@solana/web3.js";
 import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
-const names = ref("爬虫信息数据");
-const home = ref([
+const names = ref(t("navbar.information"));
+const home =  computed(()=>[
   {
     name: "home",
     title: t("navbar.home"),
   },
   {
     name: "pool",
-    title: "碎片合成",
+    title: t("navbar.pool"),
   },
   {
     name: "detail",
-    title: "数据查询",
+    title: t("navbar.data"),
   },
 ]);
 const show = ref(false);
 const flag = ref(0);
 const router = useRouter();
+const { locale } = useI18n();
+const isloca = ref(false)
+
+const changeloca=()=>{
+  isloca.value = !isloca.value
+locale.value = isloca.value==true?"zh":'en';
+}
 
 const showpu = () => {
   show.value = !show.value;
@@ -263,7 +270,7 @@ onMounted(() => {
           }
         }
         .qian {
-          width: 128px;
+          width: 146px;
           height: 34px;
           font-size: 18px;
           color: #ffffff;
@@ -393,7 +400,7 @@ onMounted(() => {
         margin-left: -20px;
       }
       .nav_left {
-        width: 20%;
+        width: 22%;
         height: 30px;
         font-size: 14px;
         background-color: #733dff;

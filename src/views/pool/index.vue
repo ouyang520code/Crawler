@@ -6,17 +6,17 @@
         v-model="value1"
         label=""
         left-icon="search"
-        placeholder="请输入...."
+        :placeholder="t('home.input')"
         center="true"
       />
-      <div class="btn" style="cursor: pointer;">确认</div>
+      <div class="btn" style="cursor: pointer;">{{t('home.sure')}}</div>
     </div>
     <div class="info">
-      <span>地址：{{ walletAddress }}</span>
+      <span>{{t('home.address')}}：{{ walletAddress }}</span>
       <div>
         NFT：{{ balance
         }}<span style="margin-left: 10px">{{
-          balance > 0 ? "已产生" : "未产生"
+          balance > 0 ? t("home.production") : t("home.ispro")
         }}</span>
       </div>
     </div>
@@ -31,21 +31,22 @@
         <img src="../../assets/img/zhuan1.png" alt="" />
         <div class="num">
           <span class="sui">{{ fragment }}</span>
-          <span class="content">碎片数量</span>
+          <span class="content">{{t('pool.num')}}</span>
         </div>
         <div class="inpt_bi">
           <van-field
             v-model="value2"
-            placeholder="请输入代币输入合成数量"
+            :placeholder="t('pool.quantity')"
             center="true"
+            type="number"
           />
         </div>
         <img src="../../assets/img/huan.png" alt="" class="huan" />
         <div class="huo">
           <img src="../../assets/img/num.png" alt="" />
-          <span>获得数量</span>
+          <span>{{t('pool.Obtain')}}</span>
         </div>
-        <div class="sure" @click="solMintNft">确认</div>
+        <div class="sure" @click="solMintNft">{{t('home.sure')}}</div>
       </div>
     </div>
   </div>
@@ -85,8 +86,9 @@ import {
   showSuccessToast,
 } from "vant";
 import $apis from "@/networks/apis";
-import { version } from "process";
+import { useI18n } from "vue-i18n";
 
+const { t } = useI18n();
 const value1 = ref("");
 const value2 = ref("");
 const loading = ref(false);
@@ -116,7 +118,7 @@ const updateTokenBalance = async () => {
 // mintNft 功能
 const solMintNft = async () => {
   if (value2.value == 0 || value2.value == "")
-    return showToast("请输入兑换数量");
+    return showToast("t('pool.quantity')");
   const amount = new BN(100 * value2.value);
 
   try {
@@ -129,7 +131,7 @@ const solMintNft = async () => {
 
     loading.value = true;
     showLoadingToast({
-      message: "正在 Mint NFT...",
+      message: "Mint NFT...",
       forbidClick: true,
     });
 
@@ -266,7 +268,7 @@ const solMintNft = async () => {
       console.log("Transaction Signature", signature);
 
       status.value = `Mint NFT 成功！交易ID: ${signature}`;
-      showSuccessToast("Mint NFT 成功！");
+      showSuccessToast("Mint NFT success！");
       getInfo();
     } catch (error) {
       console.error("Mint NFT error:", error);
@@ -275,13 +277,13 @@ const solMintNft = async () => {
         showToast(error.message);
       } else {
         status.value = "发生未知错误";
-        showToast("发生未知错误");
+        showToast("t('pool.err')");
       }
     }
   } catch (error) {
     console.error("Mint NFT error:", error);
     if (!walletService.isUserRejection(error)) {
-      showToast(error instanceof Error ? error.message : "Mint NFT 失败");
+      showToast(error instanceof Error ? error.message : "Mint NFT fail");
     }
   } finally {
     loading.value = false;
@@ -413,7 +415,8 @@ onUnmounted(() => {
   }
   .info {
     width: 70%;
-    height: 119px;
+    min-height: 119px;
+    height: auto;
     border-radius: 5px;
     border: 1px solid #8a3dff;
     margin: 0 auto;
@@ -453,10 +456,9 @@ onUnmounted(() => {
         background-repeat: no-repeat;
         background-size: 100% 100%;
         display: flex;
-        justify-content: flex-start;
+        justify-content: center;
         align-items: center;
         margin: 740px auto;
-        padding: 0 11%;
         img {
           width: 25px;
           height: 44px;
@@ -576,7 +578,8 @@ onUnmounted(() => {
     }
     .info {
       width: 92%;
-      height: 74px;
+      min-height: 74px;
+      height: auto;
       border-radius: 5px;
       margin: -8% auto;
       span {
