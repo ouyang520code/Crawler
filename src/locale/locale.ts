@@ -31,6 +31,9 @@ export type LocaleTokens = {
     balance:string;
     success:string;
     fail:string;
+    qidong:string;
+    inaddress:string;
+    sureadress:string;
   };
   pool: {
     num:string;

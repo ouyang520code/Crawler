@@ -30,7 +30,10 @@ const zh: LocaleTokens = {
     provider:"未找到钱包提供者",
     balance:"代币余额不足",
     success:"节点启动需要时间请耐心",
-    fail:"节点启动失败"
+    fail:"节点启动失败",
+    qidong:"启动节点需要时间，请耐心等待",
+    inaddress:"请输入地址",
+    sureadress:"请输入正确的地址"
   },
   pool: {
     num:"碎片数量",

@@ -30,7 +30,10 @@ const en: LocaleTokens = {
     provider:"Wallet provider not found",
     balance:"Insufficient token balance",
     success:"Node startup takes time, please be patient",
-    fail:"Node startup failed"
+    fail:"Node startup failed",
+    qidong:"Starting the node takes time, please be patient and wait",
+    inaddress:"Please enter the address",
+    sureadress:"Please enter the correct address"
   },
   pool: {
     num:"Number of fragments",
