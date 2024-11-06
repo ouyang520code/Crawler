@@ -371,7 +371,7 @@ const buyNode = async () => {
     });
     const provider = getProvider();
     if (!provider) {
-      showToast("t('home.provider')");
+      showToast(t('home.provider'));
       throw new Error("未找到钱包提供者");
     }
 
@@ -380,7 +380,7 @@ const buyNode = async () => {
       provider.wallet.publicKey
     );
     if (currentTokenBalance < Number(inputAmount.value)) {
-      showToast("t('home.balance')");
+      showToast(t('home.balance'));
       throw new Error(
         `代币余额不足。当前余额: ${currentTokenBalance}，需要: ${inputAmount.value}`
       );
@@ -449,7 +449,7 @@ const buyNode = async () => {
       .queryTx({ txId: tx })
       .then((res) => {
         showLoadingToast({
-          message: "t('home.success')",
+          message: t('home.success'),
           mask: true,
         });
         if (res.code == 200) {
@@ -459,7 +459,7 @@ const buyNode = async () => {
         }
       })
       .catch((err) => {
-        showToast("t('home.fail)");
+        showToast(t('home.fail'));
         console.log("err>>>", err);
       });
     inputAmount.value = "";
