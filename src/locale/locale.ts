@@ -1,4 +1,4 @@
-import { S } from "h5/assets/index-de3d961b";
+
 
 export type LocaleTokens = {
   navbar: {
@@ -37,6 +37,7 @@ export type LocaleTokens = {
     quantity:string;
     Obtain:string;
     err:string;
+    mint:string;
   };
   detail: {
     emtype:string;

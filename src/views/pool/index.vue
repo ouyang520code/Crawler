@@ -7,7 +7,7 @@
           label=""
           left-icon="search"
           :placeholder="t('home.input')"
-          center="true"
+          :center="true"
       />
       <div class="btn" style="cursor: pointer;">{{ t('home.sure') }}</div>
     </div>
@@ -97,7 +97,7 @@ import {
 
 const {t} = useI18n();
 const value1 = ref("");
-const value2 = ref("");
+const value2 = <any>ref("");
 const loading = ref(false);
 const status = ref("");
 const tokenBalance = ref(0);
@@ -126,7 +126,10 @@ const updateTokenBalance = async () => {
 // mintNft 功能
 const solMintNft = async () => {
   if (value2.value == 0 || value2.value == "") {
-    return showToast("t('pool.quantity')");
+    return showToast(t('pool.quantity'));
+  }
+  if(value2.value>10){
+    return showToast(t('pool.mint'))
   }
   // const amount = new BN(100 * parseInt(value2.value));
   for (let i = 0; i < parseInt(value2.value); i++) {

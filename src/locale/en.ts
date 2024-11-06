@@ -36,7 +36,8 @@ const en: LocaleTokens = {
     num:"Number of fragments",
     quantity:"Please enter the token and the synthesis quantity",
     Obtain:"Obtain quantity",
-    err:"Unknown error occurred"
+    err:"Unknown error occurred",
+    mint:"Maximum of 10 mints per session"
   },
   detail: {
     emtype:"No more data available at the moment~",

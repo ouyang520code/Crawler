@@ -36,7 +36,8 @@ const zh: LocaleTokens = {
     num:"碎片数量",
     quantity:"请输入代币输入合成数量",
     Obtain:"获得数量",
-    err:"发生未知错误"
+    err:"发生未知错误",
+    mint:"一次最多mint10个"
   },
   detail: {
     emtype:"暂无更多数据~",
