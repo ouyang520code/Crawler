@@ -252,8 +252,6 @@ const onCanvasClick = (event: MouseEvent) => {
       child.name.includes(`active`)
     );
     if (targetPlane && intersect.object.name === targetPlane.name) {
-      console.log(targetPlane, "00000");
-
       // 生成dom定位
       const domElement = document.querySelector(
         ".my-class-name"
@@ -595,7 +593,7 @@ const solMintPoint = async () => {
     if (!wallet.value) {
       await connectWallet();
       if (!wallet.value) {
-        throw new Error("t(home.wallet)");
+        throw new Error(t('home.wallet'));
       }
     }
     loading.value = true;
@@ -622,7 +620,7 @@ const solMintPoint = async () => {
       const accountData = await program.account.dataAccount.fetch(pdaAccount);
       console.log("PDA Account Data:", JSON.stringify(accountData, null, 2));
       let num = JSON.parse(JSON.stringify(accountData, null, 2));
-      if (num.amount <= 0) return showToast("t('home.linqu')");
+      if (num.amount <= 0) return showToast(t('home.linqu'));
       fragment.value = fragment.value + num.amount * 1;
     } catch (error) {
       console.log("PDA account data not found or error:", error);

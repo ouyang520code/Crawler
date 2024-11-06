@@ -37,7 +37,7 @@
           <van-field
             v-model="value2"
             :placeholder="t('pool.quantity')"
-            center="true"
+            :center="true"
             type="number"
           />
         </div>
@@ -46,7 +46,7 @@
           <img src="../../assets/img/num.png" alt="" />
           <span>{{t('pool.Obtain')}}</span>
         </div>
-        <div class="sure" @click="solMintNft">{{t('home.sure')}}</div>
+        <div class="sure" @click="solMintNft" style="cursor: pointer;">{{t('home.sure')}}</div>
       </div>
     </div>
   </div>
@@ -118,7 +118,7 @@ const updateTokenBalance = async () => {
 // mintNft 功能
 const solMintNft = async () => {
   if (value2.value == 0 || value2.value == "")
-    return showToast("t('pool.quantity')");
+    return showToast(t('pool.quantity'));
   const amount = new BN(100 * value2.value);
 
   try {
