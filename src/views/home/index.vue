@@ -31,7 +31,7 @@
         </div>
       </div>
       <div v-else class="gress">
-        <div class="gress_box">
+        <div class="gress_box" v-if="show">
           <img src="../../assets/img/gress.png" alt="" />
           <div class="bili" :style="{ width: gressWidth + '%' }">
             <span>{{ gressWidth }}%</span>
@@ -153,6 +153,7 @@ const coordinate = ref([]);
 const fragment = ref(0);
 const hanshu = ref("");
 const zuobiao = ref("");
+const show = ref(false)
 
 // THREE.js 相关变量声明
 let scene: THREE.Scene & { position: THREE.Vector3 };
@@ -560,9 +561,11 @@ const getcore = (item) => {
 // 点击查询坐标
 const worm = (item) => {
   if (finish.value == false) {
+    show.value = true
     updateProgress(item);
   } else {
     finish.value = false;
+    show.value = true
     gressWidth.value = 0;
     updateProgress(item);
   }
