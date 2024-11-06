@@ -277,7 +277,7 @@ const solMintNft = async () => {
         showToast(error.message);
       } else {
         status.value = "发生未知错误";
-        showToast("t('pool.err')");
+        showToast(t('pool.err'));
       }
     }
   } catch (error) {
