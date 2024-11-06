@@ -27,7 +27,7 @@ export const METADATA_INFO = new PublicKey(
   "55uh8C2y2MKoMpkkPQVHc8EymQ822M1eeYurTim1g5v4"
 );
 export const MASTER_EDITION_INFO = new PublicKey(
-  "FqZG8hawmUGmWgbmZ2Zu73kyTvMDFZqAj6y6KWSyfAyF"
+  "25izbF3Xb7P14TFoco4p7kyMvJdNYTUEQp4ZZHPYvw9y"
 );
 export const MINT_INFO = new PublicKey(
   "3gQVUrzb5qWFsNppMWMVMPMaRkpDBqtH5RZHYaokoBdE"

@@ -10,7 +10,7 @@ export default defineConfig({
     proxy: {
       "/api": {
         // 这里匹配所有以 '/api' 开头的请求
-        target: "http://www.qipancong.xyz:8000/", // 你的API服务器地址
+        target: "https://api.qipancong.xyz/", // 你的API服务器地址
         changeOrigin: true,
         // rewrite: (path) => path.replace(/^\/api/, ""), // 重写路径: 去掉路径中的 '/api'
       },
@@ -28,7 +28,8 @@ export default defineConfig({
   },
   define: {
     "process.env": {},
-    global: {},
+    // global: {},
+    '_vm._self._c':{}
   },
   build: {
     commonjsOptions: {

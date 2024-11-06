@@ -9,7 +9,7 @@
         placeholder="请输入...."
         :center="true"
       />
-      <div class="btn" @click="queryaddress">确认</div>
+      <div class="btn" @click="queryaddress" style="cursor: pointer;">确认</div>
     </div>
     <div class="info">
       <span>地址：{{ walletAddress }}</span>
@@ -72,7 +72,7 @@
           当前产生的NFT碎片：<span>{{ fragment }}</span>
           <img src="../../assets/img/zhuan.png" alt="" />
         </div>
-        <div class="linqu" @click="receivePoint">
+        <div class="linqu" @click="solMintPoint">
           <img src="../../assets/img/zhuan.png" alt="" />
           领取碎片
         </div>
@@ -113,13 +113,7 @@ import {
 import BN from "bn.js";
 import { IDL } from "@/idl/idl";
 import $apis from "@/networks/apis";
-import {
-  showSuccessToast,
-  showLoadingToast,
-  showFailToast,
-  closeToast,
-  showToast,
-} from "vant";
+import { showLoadingToast, closeToast, showToast } from "vant";
 
 // 添加 window.solana 类型声明
 declare global {
@@ -175,6 +169,7 @@ const getPdaAccount = (walletPubkey: PublicKey, programId: PublicKey) => {
     [Buffer.from(DATA_SEED), walletPubkey.toBuffer()],
     programId
   );
+
   return pdaAccount;
 };
 // 添加 THREE.js 相关函数
@@ -247,17 +242,18 @@ const onCanvasClick = (event: MouseEvent) => {
       // if (mesh.name.includes('active')) {
       //   mesh.name = mesh.name.split('active').join('');
       // }
-      
     });
     // 查找符合指定条件的网格修改材质
     const targetPlane = gridGroup.children.find((child) =>
       child.name.includes(`active`)
     );
     if (targetPlane && intersect.object.name === targetPlane.name) {
-      console.log(targetPlane, '00000');
-      
+      console.log(targetPlane, "00000");
+
       // 生成dom定位
-      const domElement = document.querySelector(".my-class-name") as HTMLElement;
+      const domElement = document.querySelector(
+        ".my-class-name"
+      ) as HTMLElement;
       if (domElement) {
         domElement.style.display = "block";
         const scrollX = window.scrollX || window.pageXOffset;
@@ -271,13 +267,12 @@ const onCanvasClick = (event: MouseEvent) => {
         setTimeout(() => {
           domElement.style.display = "none";
         }, 1500);
-      }   
+      }
       // const plane = intersect.object as THREE.Mesh;
       // plane.material = new THREE.MeshBasicMaterial({
       //   color: "#813DFF",
       // });
     }
-    
   }
 };
 
@@ -306,7 +301,7 @@ const updateGridColor = (item: any) => {
       targetPlane.material = new THREE.MeshBasicMaterial({
         color: "#813DFF",
       });
-      targetPlane.name = targetPlane.name + 'active';
+      targetPlane.name = targetPlane.name + "active";
     }
   }
 };
@@ -318,7 +313,7 @@ const updateWalletInfo = async () => {
     walletAddress.value = wallet.value.publicKey.toString();
     // balance.value = await walletService.getSolBalance(wallet.value.publicKey);
     if (walletAddress.value.length > 0) {
-      // getaddress();
+      getaddress();
       getInfo();
     }
     tokenBalance.value = await walletService.getTokenBalance(
@@ -484,7 +479,7 @@ const getInfo = () => {
       if (res.code == 200) {
         console.log("res>>>用户信息", res);
         fragment.value = res.data.all_point;
-        balance.value = res.data.node_success;
+        balance.value = parseInt((res.data.node_success * 1024) / 100);
       }
     })
     .catch((err) => {
@@ -526,7 +521,7 @@ const getaddress = () => {
     .then((res) => {
       if (res.code == 200) {
         console.log("res地址查询坐标>>>", res);
-        coordinate.value = res.data
+        coordinate.value = res.data;
       } else {
         showToast("查询失败");
         console.log("res失败>>", res);
@@ -561,19 +556,16 @@ const getcore = (item) => {
 };
 // 点击查询坐标
 const worm = (item) => {
-  if(finish.value==false){
-      updateProgress(item);
-  }else{
-    finish.value = false
-    gressWidth.value = 0
+  if (finish.value == false) {
+    updateProgress(item);
+  } else {
+    finish.value = false;
+    gressWidth.value = 0;
     updateProgress(item);
   }
-
 };
 // 进度条
 const updateProgress = (item) => {
-  console.log("item>>>",item);
-  
   localStorage.setItem("item", JSON.stringify(item));
   const interval = setInterval(() => {
     gressWidth.value += 1; // 更新响应式数据
@@ -613,9 +605,7 @@ const solMintPoint = async () => {
     const tokenAccount = await walletService.getUserTokenAccount();
 
     const program = new Program(IDL as unknown as Idl, PROGRAM_ID, provider);
-
-    // 为用户创建代币账户
-
+      
     // 获取 PDA 账户，使用与 buyNode 相同的方式
     const pdaAccount = getPdaAccount(
       provider.wallet.publicKey,
@@ -628,14 +618,17 @@ const solMintPoint = async () => {
       const accountData = await program.account.dataAccount.fetch(pdaAccount);
       console.log("PDA Account Data:", JSON.stringify(accountData, null, 2));
       let num = JSON.parse(JSON.stringify(accountData, null, 2));
+      if(num.amount<=0) return showToast('无可领取碎片')
       fragment.value = fragment.value + num.amount * 1;
     } catch (error) {
       console.log("PDA account data not found or error:", error);
     }
-
     // 获取 Point PDA
     const [pointPDA] = PublicKey.findProgramAddressSync(
-      [Buffer.from("point")],
+      [
+        Buffer.from("POINT"),
+        program.programId.toBuffer()
+      ],
       program.programId
     );
     console.log("Point PDA:", pointPDA.toString());
@@ -661,7 +654,6 @@ const solMintPoint = async () => {
           .instruction()
       );
     }
-
     // 添加 Mint Point 指令
     try {
       const tx = await program.methods
@@ -682,24 +674,23 @@ const solMintPoint = async () => {
           sysvarInstructionsInfo: SYSVAR_INSTRUCTIONS,
           splTokenProgramInfo: TOKEN_PROGRAM_ID,
           splAtaProgramInfo: ASSOCIATED_TOKEN_PROGRAM_ID,
-        })
-        .instruction();
-
+        }).rpc()
+        // .instruction();
       // 创建交易
-      const transaction = new Transaction();
-      transaction.add(tx);
-      transaction.recentBlockhash = (
-        await walletService.getConnection().getLatestBlockhash()
-      ).blockhash;
-      transaction.feePayer = provider.wallet.publicKey;
-
-      // 发送交易
-      const signature = await provider.wallet.signTransaction(transaction);
+      // const transaction = new Transaction();
+      // transaction.add(tx);
+      // transaction.recentBlockhash = (
+      //   await walletService.getConnection().getLatestBlockhash()
+      // ).blockhash;
+      // transaction.feePayer = provider.wallet.publicKey;
+      // // 发送交易
+      // const signature = await provider.wallet.signTransaction(transaction);
+    
 
       // 打印交易签名
-      console.log("Transaction Signature", signature);
+      // console.log("Transaction Signature", signature);
 
-      status.value = `Mint Point 成功！交易ID: ${signature}`;
+      // status.value = `Mint Point 成功！交易ID: ${signature}`;
     } catch (error) {
       console.error("Mint Point error:", error);
       if (error instanceof Error) {
@@ -831,22 +822,23 @@ const reduce = () => {
 
 // ... 其他 THREE.js 相关函数保持不变
 
-const receivePoint = () => {
-  $apis
-    .mintPoint({ address: walletAddress.value })
-    .then((res: any) => {
-      if (res.code == 200) {
-        // 调用 mintPoint 函数
-        solMintPoint();
-      } else {
-        showToast(res.error);
-      }
-    })
-    .catch((err) => {
-      // showToast(err.message)
-      console.log("err>>", err);
-    });
-};
+// const receivePoint = () => {
+//   $apis
+//     .mintPoint({ address: walletAddress.value })
+//     .then((res: any) => {
+//       // solMintPoint();
+//       if (res.code == 200) {
+//         // 调用 mintPoint 函数
+//         // solMintPoint();
+//       } else {
+//         showToast(res.error);
+//       }
+//     })
+//     .catch((err) => {
+//       // showToast(err.message)
+//       console.log("err>>", err);
+//     });
+// };
 </script>
 
 <style lang="less" scoped>
@@ -1183,8 +1175,9 @@ const receivePoint = () => {
       height: 78px;
       border-radius: 5px;
       margin: 34% auto;
-
       span {
+        word-wrap: break-word;
+        word-break: break-all;
         font-size: 12px;
       }
 

@@ -9,7 +9,7 @@
         placeholder="请输入...."
         center="true"
       />
-      <div class="btn">确认</div>
+      <div class="btn" style="cursor: pointer;">确认</div>
     </div>
     <div class="info">
       <span>地址：{{ walletAddress }}</span>
@@ -24,7 +24,7 @@
       <div class="left">
         <div class="left_btn">
           <img src="../../assets/img/zhuan.png" alt="" />
-          <span>122</span>
+          <span>{{ fragment }}</span>
         </div>
       </div>
       <div class="right">
@@ -97,7 +97,7 @@ const balance = ref(0);
 const wallet = ref<any>(null);
 const fragment = ref(0);
 const connected = ref(false);
-const vseison = ref('')
+const vseison = ref("");
 
 // 获取代币余额
 const updateTokenBalance = async () => {
@@ -163,7 +163,9 @@ const solMintNft = async () => {
     try {
       const accountData = await program.account.admin.fetch(adminPad);
       console.log("PDA Account Data:", JSON.stringify(accountData, null, 2));
-      vseison.value = JSON.parse(JSON.stringify(accountData, null, 2)).editionNumber
+      vseison.value = JSON.parse(
+        JSON.stringify(accountData, null, 2)
+      ).editionNumber;
     } catch (error) {
       console.log("PDA account data not found or error:", error);
     }
@@ -579,6 +581,8 @@ onUnmounted(() => {
       margin: -8% auto;
       span {
         font-size: 14px;
+        word-wrap: break-word;
+        word-break: break-all;
       }
       div {
         margin-top: 5px;

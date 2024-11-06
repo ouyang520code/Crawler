@@ -1555,12 +1555,12 @@
 
 "@vant/popperjs@^1.3.0":
   version "1.3.0"
-  resolved "https://registry.npmjs.org/@vant/popperjs/-/popperjs-1.3.0.tgz"
+  resolved "https://registry.yarnpkg.com/@vant/popperjs/-/popperjs-1.3.0.tgz#e0eff017124b5b2352ef3b36a6df06277f4400f2"
   integrity sha512-hB+czUG+aHtjhaEmCJDuXOep0YTZjdlRR+4MSmIFnkCQIxJaXLQdSsR90XWvAI2yvKUI7TCGqR8pQg2RtvkMHw==
 
 "@vant/use@^1.6.0":
   version "1.6.0"
-  resolved "https://registry.npmjs.org/@vant/use/-/use-1.6.0.tgz"
+  resolved "https://registry.yarnpkg.com/@vant/use/-/use-1.6.0.tgz#237df3091617255519552ca311ffdfea9de59001"
   integrity sha512-PHHxeAASgiOpSmMjceweIrv2AxDZIkWXyaczksMoWvKV2YAYEhoizRuk/xFnKF+emUIi46TsQ+rvlm/t2BBCfA==
 
 "@vitejs/plugin-vue@^4.2.3":
@@ -4908,7 +4908,7 @@ uuidv4@^6.2.13:
 
 vant@^4.7.2:
   version "4.9.8"
-  resolved "https://registry.npmjs.org/vant/-/vant-4.9.8.tgz"
+  resolved "https://registry.yarnpkg.com/vant/-/vant-4.9.8.tgz#304e6751aca5c6af1b11ff5ecb0d3d4cb96bdc77"
   integrity sha512-iP+jNzwxkCeEdTrlUjro3WoXgY32+1CldOtLSc2K8acY7hR7t1zCkjzXSR9zWjtWT7zgNL1LEXofL8O7mtkYdQ==
   dependencies:
     "@vant/popperjs" "^1.3.0"

@@ -7,7 +7,7 @@ import "vant/lib/index.css";
 import "amfe-flexible";
 import { Toast,Field} from "vant";
 // import { createI18n } from "vue-i18n";
-import messages from "./locale"; // 导入国际化语言包
+// import messages from "./locale"; // 导入国际化语言包
 import { createPinia } from "pinia";
 
 window.global = window;

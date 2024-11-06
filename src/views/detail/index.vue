@@ -53,14 +53,14 @@
     <div class="pages">
       <div class="limit">
         <img src="../../assets/img/left.png" alt="" @click="reduce" />
-        <span>{{ currentPage }} / 页</span>
+        <span>{{ currentPage }} / {{count}}页</span>
         <img src="../../assets/img/right.png" alt="" @click="add" />
       </div>
     </div>
   </div>
 </template>
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, registerRuntimeCompiler } from "vue";
 import $apis from "@/networks/apis";
 import { walletService } from "@/utils/wallet";
 import {
@@ -75,8 +75,11 @@ const wallet = ref<any>(null);
 const fragment = ref(0);
 const connected = ref(false);
 const rows = ref([]);
+const count = <any>ref('')
 
 const add = () => {
+  if(currentPage.value>count.value) return showToast("已经是最后一页")
+  if(list.value.length==0) return showToast("暂无更多数据~")
   currentPage.value += 1;
   getaddress();
 };
@@ -96,11 +99,12 @@ const getaddress = () => {
     .then((res) => {
       if (res.code == 200) {
         let redcuo = res.data
+        if(redcuo.length==0) return showToast("暂无更多数据~")
+        count.value = res.count
         redcuo.forEach((item,index)=>{
            item.hash = item.tx.substring(0, 4) + "......" + item.tx.slice(-4);
-           list.value.push(item)
         })
-        // list.value = res.data;
+        list.value = redcuo;
         console.log("res地址查询坐标>>>", list.value);
         rows.value = chunkedArray();
         console.log("rows>>>", rows.value);
@@ -247,6 +251,7 @@ onUnmounted(() => {
       line-height: 76px;
       text-align: center;
       border-radius: 10px;
+      cursor: pointer;
     }
   }
   .info {
@@ -262,6 +267,8 @@ onUnmounted(() => {
     span {
       color: #ffffff;
       font-size: 18px;
+       word-wrap: break-word;
+        word-break: break-all;
     }
     div {
       color: #ffffff;
@@ -383,6 +390,8 @@ onUnmounted(() => {
       margin: -14% auto;
       span {
         font-size: 14px;
+         word-wrap: break-word;
+        word-break: break-all;
       }
       div {
         margin-top: 5px;

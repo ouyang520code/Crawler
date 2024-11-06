@@ -1,0 +1,1 @@
+import{_ as e,b as t,e as o}from"./index-de3d961b.js";const n={components:{},data(){return{connectUs:!1}},created(){},mounted(){},methods:{}},s={class:"not-found"};function c(a,r,_,d,p,f){return t(),o("div",s)}const u=e(n,[["render",c]]);export{u as default};
