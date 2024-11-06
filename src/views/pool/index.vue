@@ -36,10 +36,10 @@
         </div>
         <div class="inpt_bi">
           <van-field
-              v-model="value2"
-              :placeholder="t('pool.quantity')"
-              center="true"
-              type="number"
+            v-model="value2"
+            :placeholder="t('pool.quantity')"
+            :center="true"
+            type="number"
           />
         </div>
         <img src="../../assets/img/huan.png" alt="" class="huan"/>
@@ -47,7 +47,7 @@
           <img src="../../assets/img/num.png" alt=""/>
           <span>{{ t('pool.Obtain') }}</span>
         </div>
-        <div class="sure" @click="solMintNft">{{ t('home.sure') }}</div>
+        <div class="sure" @click="solMintNft" style="cursor: pointer;">{{t('home.sure')}}</div>
       </div>
     </div>
   </div>
@@ -127,7 +127,6 @@ const updateTokenBalance = async () => {
 const solMintNft = async () => {
   if (value2.value == 0 || value2.value == "") {
     return showToast("t('pool.quantity')");
-
   }
   // const amount = new BN(100 * parseInt(value2.value));
   for (let i = 0; i < parseInt(value2.value); i++) {
@@ -320,7 +319,7 @@ const mintNft = async () => {
         showToast(error.message);
       } else {
         status.value = "发生未知错误";
-        showToast("发生未知错误");
+        showToast(t('pool.err'));
       }
     } finally {
       loading.value = false;

@@ -346,6 +346,7 @@ onMounted(() => {
         justify-content: space-between;
         align-items: center;
         .jump {
+          cursor: pointer;
           color: #dcdcdc;
           font-size: 20px;
         }
