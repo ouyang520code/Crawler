@@ -539,7 +539,7 @@ const getaddress = () => {
     });
 };
 // 查询确认
-const queryaddress = () => {
+const queryaddress = () => {  
   if (value1.value == "") return showToast(t('home.inaddress'));
   if (value1.value != walletAddress.value) return showToast(t('home.sureadress'));
   getaddress();
