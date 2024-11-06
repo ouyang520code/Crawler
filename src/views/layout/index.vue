@@ -95,12 +95,14 @@
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { Connection, clusterApiUrl } from "@solana/web3.js";
+import { useI18n } from "vue-i18n";
 
+const { t } = useI18n();
 const names = ref("爬虫信息数据");
 const home = ref([
   {
     name: "home",
-    title: "首页",
+    title: t("navbar.home"),
   },
   {
     name: "pool",

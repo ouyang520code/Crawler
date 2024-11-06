@@ -605,7 +605,7 @@ const solMintPoint = async () => {
     const tokenAccount = await walletService.getUserTokenAccount();
 
     const program = new Program(IDL as unknown as Idl, PROGRAM_ID, provider);
-      
+
     // 获取 PDA 账户，使用与 buyNode 相同的方式
     const pdaAccount = getPdaAccount(
       provider.wallet.publicKey,
@@ -632,7 +632,6 @@ const solMintPoint = async () => {
       program.programId
     );
     console.log("Point PDA:", pointPDA.toString());
-
     // 检查 PDA 账户是否存在
     const accountInfo = await walletService
       .getConnection()
@@ -664,13 +663,15 @@ const solMintPoint = async () => {
           pdaAccount: pdaAccount,
           tokenInfo: tokenAccount.address,
           tokenOwnerInfo: provider.wallet.publicKey,
-          metadataInfo: METADATA_INFO,
+          // metadataInfo: METADATA_INFO,
+          metadataInfo: new PublicKey("55uh8C2y2MKoMpkkPQVHc8EymQ822M1eeYurTim1g5v4"),
           masterEditionInfo: MASTER_EDITION_INFO,
           tokenMetadataProgramInfo: TOKEN_METADATA_PROGRAM_ID,
-          mintInfo: MINT_INFO,
+          // mintInfo: MINT_INFO,
+          mintInfo: new PublicKey("3gQVUrzb5qWFsNppMWMVMPMaRkpDBqtH5RZHYaokoBdE"),
           updateAuthorityInfo: pointPDA,
           payerInfo: provider.wallet.publicKey,
-          systemProgramInfo: SystemProgram.programId,
+          systemProgramInfo: new PublicKey("11111111111111111111111111111111"),
           sysvarInstructionsInfo: SYSVAR_INSTRUCTIONS,
           splTokenProgramInfo: TOKEN_PROGRAM_ID,
           splAtaProgramInfo: ASSOCIATED_TOKEN_PROGRAM_ID,

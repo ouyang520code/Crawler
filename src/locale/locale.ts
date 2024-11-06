@@ -66,52 +66,6 @@ export type LocaleTokens = {
     compound:string,
     tuned:string
   };
-  games: {
-    into:string;
-    title: string;
-    games: string;
-    royale: string;
-    introduce:string;
-    dinosaur:string;
-    pasture:string;
-    public:string;
-  };
-  personage: {
-    points:string;
-    bsc:string;
-    title: string;
-    address: string;
-    detail: string;
-    self: string;
-    team: string;
-    withdraw: string;
-    recharge: string;
-    please_input_recharge_number: string;
-    confirm_recharge: string;
-    please_input_withdraw_number: string;
-    confirm_withdraw: string;
-    service_charges: string;
-    level_up_term: string;
-    level_up_term_desc1: string;
-    level_up_term_desc2: string;
-    current_level: string;
-    self_investment: string;
-    direct_push_num: string;
-    team_num: string;
-    direct_investment: string;
-    team_investment: string;
-    invite_code: string;
-    write_invite_code: string;
-    qrcode_desc: string;
-    link: string;
-    obtained: string;
-    binding_code: string;
-    copy: string;
-    yesterday: string;
-    total: string;
-    sussces: string;
-    fial: string;
-  };
   detail: {
     detail_1: string;
     detail_2: string;
