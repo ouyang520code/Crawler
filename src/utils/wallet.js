@@ -53,7 +53,6 @@ export class WalletService {
   // 获取 Provider
   getProvider(wallet) {
     if (!wallet) return null
-    
     return new AnchorProvider(
       this.connection,
       {
@@ -67,7 +66,7 @@ export class WalletService {
       }
     )
   }
-  
+
   // 获取 SOL 余额
   async getSolBalance(publicKey) {
     try {
@@ -95,6 +94,7 @@ export class WalletService {
 
       // 获取用户代币账户
       const tokenAccount = await this.getUserTokenAccount(mint);
+
       if (!tokenAccount.exists || !tokenAccount.address) {
         return 0;
       }
@@ -148,13 +148,13 @@ export class WalletService {
     if (wallet) {
       // 移除旧的监听器
       this.removeWalletListeners()
-      
+
       // 添加新的监听器
       wallet.on('connect', () => {
         console.log('Wallet connected event')
         this.callbacks.onConnect?.(wallet)
       })
-      
+
       wallet.on('disconnect', () => {
         console.log('Wallet disconnected event')
         this.callbacks.onDisconnect?.()
@@ -164,7 +164,7 @@ export class WalletService {
       if (wallet.isConnected) {
         this.callbacks.onConnect?.(wallet)
       }
-      
+
       return true
     }
     return false
@@ -239,4 +239,4 @@ export class WalletService {
 }
 
 // 导出单例实例
-export const walletService = new WalletService() 
+export const walletService = new WalletService()
