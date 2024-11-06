@@ -27,7 +27,7 @@ export const METADATA_INFO = new PublicKey(
   "55uh8C2y2MKoMpkkPQVHc8EymQ822M1eeYurTim1g5v4"
 );
 export const MASTER_EDITION_INFO = new PublicKey(
-  "25izbF3Xb7P14TFoco4p7kyMvJdNYTUEQp4ZZHPYvw9y"
+  "FqZG8hawmUGmWgbmZ2Zu73kyTvMDFZqAj6y6KWSyfAyF"
 );
 export const MINT_INFO = new PublicKey(
   "3gQVUrzb5qWFsNppMWMVMPMaRkpDBqtH5RZHYaokoBdE"
@@ -43,6 +43,12 @@ export const MASTER_METADATA = new PublicKey(
 export const SYSVAR_INSTRUCTIONS = new PublicKey(
   "Sysvar1nstructions1111111111111111111111111"
 );
+
+export const EDITION_MARKERPDA=new PublicKey(
+    "fa5W7PhdhKEviZm6uMcYtxaPeQDVjxkwmFeCCjX69rZ"
+)
+
+export const MASTER_TOKEN_ACCOUNT = new PublicKey("73kkRjE1L8nmU7Aq35jyydK5WXsjS6tZRRn84Agaiea6");
 
 // 代币精度
 export const TOKEN_DECIMALS = 8;
