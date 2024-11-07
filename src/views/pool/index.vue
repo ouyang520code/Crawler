@@ -36,10 +36,10 @@
         </div>
         <div class="inpt_bi">
           <van-field
-            v-model="value2"
-            :placeholder="t('pool.quantity')"
-            :center="true"
-            type="number"
+              v-model="value2"
+              :placeholder="t('pool.quantity')"
+              :center="true"
+              type="number"
           />
         </div>
         <img src="../../assets/img/huan.png" alt="" class="huan"/>
@@ -47,53 +47,39 @@
           <img src="../../assets/img/num.png" alt=""/>
           <span>{{ t('pool.Obtain') }}</span>
         </div>
-        <div class="sure" @click="solMintNft" style="cursor: pointer;">{{t('home.sure')}}</div>
+        <div class="sure" @click="solMintNft" style="cursor: pointer;">{{ t('home.sure') }}</div>
       </div>
     </div>
   </div>
 </template>
 <script setup lang="ts">
-import {ref, onMounted, onUnmounted} from "vue";
+import {onMounted, onUnmounted, ref} from "vue";
 import {Program} from "@project-serum/anchor";
-import * as anchor from "@project-serum/anchor";
-import {PublicKey, SystemProgram, Transaction} from "@solana/web3.js";
+import {PublicKey, SystemProgram} from "@solana/web3.js";
 import {
-  TOKEN_PROGRAM_ID,
-  getAssociatedTokenAddress,
   ASSOCIATED_TOKEN_PROGRAM_ID,
-  createAssociatedTokenAccountInstruction,
-  getOrCreateAssociatedTokenAccount
+  getAssociatedTokenAddress,
+  getOrCreateAssociatedTokenAccount,
+  TOKEN_PROGRAM_ID
 } from "@solana/spl-token";
 import {walletService} from "@/utils/wallet";
 import {
-  PROGRAM_ID,
-  MASTER_EDITION_INFO,
-  SYSVAR_INSTRUCTIONS,
   DATA_SEED,
-  POINT_SEED,
-  TOKEN_METADATA_PROGRAM_ID,
   EDITION_MARKERPDA,
-  MASTER_TOKEN_ACCOUNT,
-  METADATA_INFO,
+  MASTER_EDITION_INFO,
   MASTER_METADATA,
-  MINT_NFT_AMOUNT,
-  TOKEN_MINT,
-  EDITION_MARKER_SEED,
+  MASTER_TOKEN_ACCOUNT,
   MINT_INFO,
+  POINT_SEED,
+  PROGRAM_ID,
+  SYSVAR_INSTRUCTIONS,
+  TOKEN_METADATA_PROGRAM_ID,
 } from "@/utils/constants";
 import BN from "bn.js";
 import {IDL} from "@/idl/idl";
-import {
-  showToast,
-  showLoadingToast,
-  closeToast,
-  showSuccessToast,
-} from "vant";
+import {closeToast, showLoadingToast, showSuccessToast, showToast,} from "vant";
 import $apis from "@/networks/apis";
 import {useI18n} from "vue-i18n";
-import {
-  fetchMasterEditionFromSeeds,
-} from '@metaplex-foundation/mpl-token-metadata'
 
 const {t} = useI18n();
 const value1 = ref("");
@@ -128,9 +114,22 @@ const solMintNft = async () => {
   if (value2.value == 0 || value2.value == "") {
     return showToast(t('pool.quantity'));
   }
-  if(value2.value>10){
+  if (value2.value > 10) {
     return showToast(t('pool.mint'))
   }
+  const provider = walletService.getProvider(walletService.wallet);
+  if (!provider) {
+    throw new Error("未找到钱包提供者");
+  }
+  const program = new Program(IDL, PROGRAM_ID, provider);
+  const [adminPad] = PublicKey.findProgramAddressSync(
+      [Buffer.from("adminGlobal")],
+      program.programId
+  );
+
+  const accountData = await program.account.admin.fetch(adminPad);
+  console.log("PDA Account Data:", JSON.stringify(accountData, null, 2));
+  vseison.value = (parseInt(JSON.parse(JSON.stringify(accountData, null, 2)).editionNumber, 16)).toString();
   // const amount = new BN(100 * parseInt(value2.value));
   for (let i = 0; i < parseInt(value2.value); i++) {
     await mintNft();
@@ -187,7 +186,7 @@ const mintNft = async () => {
       if (vseison.value < vseisonTemp) {
         vseison.value = vseisonTemp;
       } else {
-        vseison.value = (parseInt(vseison.value) +  1).toString();
+        vseison.value = (parseInt(vseison.value) + 1).toString();
       }
       console.log("vseison", vseison.value);
     } catch (error) {
