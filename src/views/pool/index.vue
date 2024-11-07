@@ -341,6 +341,7 @@ const mintNft = async () => {
       showSuccessToast("Mint NFT success！");
       if (tx) {
         pointBalance.value -= 100;
+         balance.value = Math.floor(pointBalance.value / 100);
       }
       getInfo();
     } catch (error) {
@@ -391,6 +392,7 @@ const updateWalletInfo = async () => {
       wallet.value.publicKey,
       MINT_INFO
     );
+     balance.value = Math.floor(pointBalance.value / 100);
   } catch (error) {
     console.error("获取钱包信息失败:", error);
   }
@@ -402,7 +404,7 @@ const getInfo = () => {
     .then((res) => {
       if (res.code == 200) {
         console.log("res>>>用户信息", res);
-       balance.value = parseInt((res.data.node_success * 1024) / 100);
+      //  balance.value = parseInt((res.data.node_success * 1024) / 100);
       }
     })
     .catch((err) => {

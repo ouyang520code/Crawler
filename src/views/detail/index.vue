@@ -8,10 +8,10 @@
         :placeholder="t('home.input')"
         :center="true"
       />
-      <div class="btn">{{t('home.sure')}}</div>
+      <div class="btn">{{ t("home.sure") }}</div>
     </div>
     <div class="info">
-      <span>{{t('home.address')}}：{{ walletAddress }}</span>
+      <span>{{ t("home.address") }}：{{ walletAddress }}</span>
       <div>
         NFT：{{ balance
         }}<span style="margin-left: 10px">{{
@@ -24,8 +24,8 @@
       <div class="foote">
         <div class="box" v-for="(item, index) in rows" :key="index">
           <div class="box_head">
-            <span>{{t('home.hash')}}</span>
-            <span>{{t('home.zuobiao')}}</span>
+            <span>{{ t("home.hash") }}</span>
+            <span>{{ t("home.zuobiao") }}</span>
           </div>
           <div class="box_list">
             <div class="list" v-for="(items, inde) in item" :key="index">
@@ -41,19 +41,19 @@
       <div style="font-size: 18px; color: #ffffff">ReptileSCAN</div>
       <div class="detail_list">
         <div class="phone_head">
-          <span>{{t('home.hash')}}</span>
-          <span>{{t('home.zuobiao')}}</span>
+          <span>{{ t("home.hash") }}</span>
+          <span>{{ t("home.zuobiao") }}</span>
         </div>
         <div class="liushui" v-for="(item, index) in list" :key="index">
-          <span>{{item.hash}}</span>
-          <span>{{item.x}} + {{item.y}}</span>
+          <span>{{ item.hash }}</span>
+          <span>{{ item.x }} + {{ item.y }}</span>
         </div>
       </div>
     </div>
     <div class="pages">
       <div class="limit">
         <img src="../../assets/img/left.png" alt="" @click="reduce" />
-        <span>{{ currentPage }} / {{count}}{{t('home.page')}}</span>
+        <span>{{ currentPage }} / {{ count }}{{ t("home.page") }}</span>
         <img src="../../assets/img/right.png" alt="" @click="add" />
       </div>
     </div>
@@ -63,10 +63,9 @@
 import { ref, onMounted, onUnmounted } from "vue";
 import $apis from "@/networks/apis";
 import { walletService } from "@/utils/wallet";
-import {
-  showToast,
-} from "vant";
+import { showToast } from "vant";
 import { useI18n } from "vue-i18n";
+import { MINT_INFO} from "@/utils/constants";
 
 const { t } = useI18n();
 const currentPage = ref(1);
@@ -78,11 +77,12 @@ const wallet = ref<any>(null);
 const fragment = ref(0);
 const connected = ref(false);
 const rows = ref([]);
-const count = <any>ref('')
+const count = <any>ref("");
+const pointBalance = ref(0);
 
 const add = () => {
-  if(currentPage.value>=count.value) return showToast("已经是最后一页")
-  if(list.value.length==0) return showToast("暂无更多数据~")
+  if (currentPage.value >= count.value) return showToast("已经是最后一页");
+  if (list.value.length == 0) return showToast("暂无更多数据~");
   currentPage.value += 1;
   getaddress();
 };
@@ -99,14 +99,14 @@ const getaddress = () => {
       page: currentPage.value,
       limit: 30,
     })
-    .then((res:any) => {
+    .then((res: any) => {
       if (res.code == 200) {
-        let redcuo = res.data
-        if(redcuo.length==0) return showToast("t('detail.emtype')")
-        count.value =Math.ceil(res.count/30)
-        redcuo.forEach((item,index)=>{
-           item.hash = item.tx.substring(0, 4) + "......" + item.tx.slice(-4);
-        })
+        let redcuo = res.data;
+        if (redcuo.length == 0) return showToast("t('detail.emtype')");
+        count.value = Math.ceil(res.count / 30);
+        redcuo.forEach((item, index) => {
+          item.hash = item.tx.substring(0, 4) + "......" + item.tx.slice(-4);
+        });
         list.value = redcuo;
         console.log("res地址查询坐标>>>", list.value);
         rows.value = chunkedArray();
@@ -147,6 +147,11 @@ const updateWalletInfo = async () => {
     tokenBalance.value = await walletService.getTokenBalance(
       wallet.value.publicKey
     );
+    pointBalance.value = await walletService.getTokenBalance(
+      wallet.value.publicKey,
+      MINT_INFO
+    );
+    balance.value = Math.floor(pointBalance.value / 100);
   } catch (error) {
     console.error("获取钱包信息失败:", error);
   }
@@ -159,7 +164,7 @@ const getInfo = () => {
       if (res.code == 200) {
         console.log("res>>>用户信息", res);
         fragment.value = res.data.all_point;
-        balance.value = parseInt((res.data.node_success * 1024) / 100);
+        // balance.value = parseInt((res.data.node_success * 1024) / 100);
       }
     })
     .catch((err) => {
@@ -169,7 +174,7 @@ const getInfo = () => {
 
 // 组件挂载时初始化钱包连接
 onMounted(async () => {
-    try {
+  try {
     const phantomWallet = walletService.getPhantomWallet();
     if (phantomWallet?.isConnected) {
       await phantomWallet.disconnect();
@@ -202,7 +207,7 @@ onMounted(async () => {
 
 // 组件卸载时清理
 onUnmounted(() => {
-   const phantomWallet = walletService.getPhantomWallet();
+  const phantomWallet = walletService.getPhantomWallet();
   if (phantomWallet?.isConnected) {
     phantomWallet.disconnect();
   }
@@ -271,8 +276,8 @@ onUnmounted(() => {
     span {
       color: #ffffff;
       font-size: 18px;
-       word-wrap: break-word;
-        word-break: break-all;
+      word-wrap: break-word;
+      word-break: break-all;
     }
     div {
       color: #ffffff;
@@ -395,7 +400,7 @@ onUnmounted(() => {
       margin: -14% auto;
       span {
         font-size: 14px;
-         word-wrap: break-word;
+        word-wrap: break-word;
         word-break: break-all;
       }
       div {

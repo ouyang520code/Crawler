@@ -158,6 +158,7 @@ const hanshu = ref("");
 const zuobiao = ref("");
 const show = ref(false);
 const isflag = ref(true);
+const pointBalance = ref(0);
 
 // THREE.js 相关变量声明
 let scene: THREE.Scene & { position: THREE.Vector3 };
@@ -330,6 +331,11 @@ const updateWalletInfo = async () => {
     tokenBalance.value = await walletService.getTokenBalance(
       wallet.value.publicKey
     );
+      pointBalance.value = await walletService.getTokenBalance(
+      wallet.value.publicKey,
+      MINT_INFO
+    );
+     balance.value = Math.floor(pointBalance.value / 100);
     console.log("tokenBalance:", tokenBalance.value);
   } catch (error) {
     console.error("获取钱包信息失败:", error);
@@ -520,7 +526,7 @@ const getInfo = () => {
         } catch (error) {
           console.log("PDA account data not found or error:", error);
         }
-        balance.value = parseInt((res.data.node_success * 1024) / 100);
+        // balance.value = parseInt((res.data.node_success * 1024) / 100);
       }
     })
     .catch((err) => {
