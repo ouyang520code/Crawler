@@ -443,7 +443,6 @@ onMounted(async () => {
   // 初始化钱包监听
   walletService.initWalletListeners();
 });
-
 // 组件卸载时清理
 onUnmounted(() => {
   const phantomWallet = walletService.getPhantomWallet();

@@ -9,7 +9,7 @@
         :placeholder="t('home.input')"
         :center="true"
       />
-      <div class="btn" @click="queryaddress" style="cursor: pointer">
+      <div class="btn" @click="queryaddress(value1)" style="cursor: pointer">
         {{ t("home.sure") }}
       </div>
     </div>
@@ -57,7 +57,7 @@
             <span
               v-for="(item, index) in coordinate"
               :key="index"
-              style="font-size: 16px; cursor: pointer"
+              style="font-size: 18px; cursor: pointer;margin-top:5px;"
               @click="worm(item)"
               >{{ t("home.zuobiao") }}：{{ item.x }} + {{ item.y }}</span
             >
@@ -324,7 +324,7 @@ const updateWalletInfo = async () => {
     walletAddress.value = wallet.value.publicKey.toString();
     // balance.value = await walletService.getSolBalance(wallet.value.publicKey);
     if (walletAddress.value.length > 0) {
-      getaddress();
+      // getaddress();
       getInfo();
     }
     tokenBalance.value = await walletService.getTokenBalance(
@@ -574,11 +574,19 @@ const getaddress = () => {
     });
 };
 // 查询确认
-const queryaddress = () => {
-  if (value1.value == "") return showToast(t("home.inaddress"));
-  if (value1.value != walletAddress.value)
-    return showToast(t("home.sureadress"));
-  getaddress();
+const queryaddress = (str) => {
+  // if (value1.value == "") return showToast(t("home.inaddress"));
+  // if (value1.value != walletAddress.value)
+  //   return showToast(t("home.sureadress"));
+  // getaddress();
+  const numbers = str.match(/\d+/g).map(Number);
+  const obj = {};
+   if (numbers.length === 2) {
+    obj.x = numbers[0];
+    obj.y = numbers[1];
+  }
+console.log("strobj>>>",obj);
+  getcore(obj)
 };
 //利用坐标查询哈希数据
 const getcore = (item) => {
@@ -587,6 +595,7 @@ const getcore = (item) => {
     .then((res) => {
       if (res.code == 200) {
         console.log("res哈希", res);
+        worm(res.data)
       } else {
         showToast(res.error);
         console.log("res哈希数据》》》", res);
@@ -884,7 +893,7 @@ const initThreeJs = () => {
 const add = () => {
   number.value += 1;
   if (coordinate.value.length != 0) {
-    getaddress();
+    // getaddress();
   }
 };
 
@@ -892,7 +901,7 @@ const reduce = () => {
   if (number.value === 1) return;
   number.value -= 1;
   if (coordinate.value.length != 0) {
-    getaddress();
+    // getaddress();
   }
 };
 
@@ -1164,10 +1173,9 @@ const receivePoint = () => {
           border-radius: 12px;
           display: flex;
           flex-direction: column;
-          padding: 2% 2%;
+          padding: 3% 4%;
           box-sizing: border-box;
           overflow: auto;
-          color: #ffffff;
         }
 
         .fenye {
