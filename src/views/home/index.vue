@@ -893,7 +893,7 @@ const initThreeJs = () => {
 const add = () => {
   number.value += 1;
   if (coordinate.value.length != 0) {
-    // getaddress();
+    getaddress();
   }
 };
 
@@ -901,7 +901,7 @@ const reduce = () => {
   if (number.value === 1) return;
   number.value -= 1;
   if (coordinate.value.length != 0) {
-    // getaddress();
+    getaddress();
   }
 };
 
