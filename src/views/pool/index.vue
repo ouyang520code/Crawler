@@ -402,8 +402,7 @@ const getInfo = () => {
     .then((res) => {
       if (res.code == 200) {
         console.log("res>>>用户信息", res);
-        fragment.value = res.data.all_point;
-        balance.value = res.data.node_success;
+       balance.value = parseInt((res.data.node_success * 1024) / 100);
       }
     })
     .catch((err) => {

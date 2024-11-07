@@ -28,7 +28,7 @@
         <div class="my-class-name">
           <div class="address">
             <span>{{ t("home.Coordinate") }}：{{ zuobiao }}</span>
-            <span>{{ t("home.hash") }}：{{ hanshu }}</span>
+            <span @click="linksol" style="cursor: pointer;">{{ t("home.hash") }}：{{ hanshu }}</span>
           </div>
         </div>
       </div>
@@ -268,7 +268,7 @@ const onCanvasClick = (event: MouseEvent) => {
         zuobiao.value = items.x + "+" + items.y;
         setTimeout(() => {
           domElement.style.display = "none";
-        }, 1500);
+        }, 3000);
       }
       // const plane = intersect.object as THREE.Mesh;
       // plane.material = new THREE.MeshBasicMaterial({
@@ -367,7 +367,6 @@ const getProvider = () => {
 const getProgram = (provider) => {
   return new Program(IDL as unknown as Idl, PROGRAM_ID, provider);
 };
-
 // 购买节点
 const buyNode = async () => {
   try {
@@ -630,7 +629,12 @@ const updateProgress = (item) => {
     }
   }, 100);
 };
-
+// 跳转sol浏览器
+const linksol = ()=>{
+  const coreinfo = JSON.parse(localStorage.getItem("item"));
+  const link = 'https://solscan.io/account/'+coreinfo.tx
+  window.open(link,"_blank")
+}
 // Mint Point 功能
 const solMintPoint = async () => {
   try {
