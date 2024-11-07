@@ -117,6 +117,10 @@ const solMintNft = async () => {
   if (value2.value > 10) {
     return showToast(t('pool.mint'))
   }
+  if(value2.value * 100 >= pointBalance.value) {
+    return showToast(t('Your 1024 Debris is insufficient'));
+  }
+
   const provider = walletService.getProvider(walletService.wallet);
   if (!provider) {
     throw new Error("未找到钱包提供者");
@@ -311,6 +315,9 @@ const mintNft = async () => {
 
       status.value = `Mint NFT 成功！交易ID: ${tx}`;
       showSuccessToast("Mint NFT success！");
+      if(tx){
+        pointBalance.value -= 100;
+      }
       getInfo();
     } catch (error) {
       console.error("Transaction failed:", error.message); // 输出错误信息
