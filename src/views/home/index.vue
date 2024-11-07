@@ -158,6 +158,7 @@ const fragment = ref(0);
 const hanshu = ref("");
 const zuobiao = ref("");
 const show = ref(false);
+const isflag = ref(true)
 
 // THREE.js 相关变量声明
 let scene: THREE.Scene & { position: THREE.Vector3 };
@@ -629,6 +630,7 @@ const solMintPoint = async () => {
     if (!wallet.value) {
       await connectWallet();
       if (!wallet.value) {
+        isflag.value = true
         throw new Error(t("home.wallet"));
       }
     }
@@ -636,6 +638,7 @@ const solMintPoint = async () => {
     status.value = "正在 Mint Point...";
     const provider = getProvider();
     if (!provider) {
+      isflag.value = true
       throw new Error("未找到钱包提供者");
     }
     const userTokenAccount = await walletService.getUserTokenAccount(MINT_INFO);
@@ -661,9 +664,13 @@ const solMintPoint = async () => {
       const accountData = await program.account.dataAccount.fetch(pdaAccount);
       console.log("PDA Account Data:", JSON.stringify(accountData, null, 2));
       let num = JSON.parse(JSON.stringify(accountData, null, 2));
-      if (num.amount <= 0) return showToast(t("home.linqu"));
+      if (num.amount <= 0){
+        isflag.value = true
+        return showToast(t("home.linqu"));
+      } 
       // fragment.value = fragment.value + num.amount * 1;
     } catch (error) {
+      isflag.value = true
       console.log("PDA account data not found or error:", error);
     }
     // 获取 Point PDA
@@ -724,6 +731,7 @@ const solMintPoint = async () => {
             commitment: "confirmed",
           });
       getInfo();
+      isflag.value = true
       // .instruction();
       // 创建交易
       // const transaction = new Transaction();
@@ -740,27 +748,35 @@ const solMintPoint = async () => {
 
       // status.value = `Mint Point 成功！交易ID: ${signature}`;
     } catch (error) {
+      isflag.value = true
       console.error("Mint Point error:", error);
       if (error instanceof Error) {
+        isflag.value = true
         status.value = `错误: ${error.message}`;
         showToast(error.message);
       } else {
+        isflag.value = true
         status.value = "发生未知错误";
         showToast("发生未知错误");
       }
     } finally {
+      isflag.value = true
       loading.value = false;
     }
   } catch (error) {
+    isflag.value = true
     console.error("Mint Point error:", error);
     if (error instanceof Error) {
+      isflag.value = true
       status.value = `错误: ${error.message}`;
       showToast(error.message);
     } else {
+      isflag.value = true
       status.value = "发生未知错误";
       showToast("发生未知错误");
     }
   } finally {
+    isflag.value = true
     loading.value = false;
   }
 };
@@ -871,9 +887,11 @@ const reduce = () => {
 // ... 其他 THREE.js 相关函数保持不变
 
 const receivePoint = () => {
-  $apis
+if(isflag.value){
+    $apis
       .mintPoint({address: walletAddress.value})
       .then((res: any) => {
+        isflag.value = false
         if (res.code == 200) {
           // 调用 mintPoint 函数
         } else {
@@ -890,6 +908,11 @@ const receivePoint = () => {
         // showToast(err.message)
         console.log("err>>", err);
       });
+}else{
+  console.log(22);
+  
+}
+
 };
 </script>
 
