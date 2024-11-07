@@ -498,7 +498,7 @@ const getchaxun = (tx) => {
     .chaxun({ txId: tx })
     .then((res) => {
       showLoadingToast({
-        message: t('home.qidong'),
+        message: t("home.qidong"),
         mask: true,
       });
       if (res.code == 200) {
@@ -529,19 +529,20 @@ const getaddress = () => {
         console.log("res地址查询坐标>>>", res);
         coordinate.value = res.data;
       } else {
-        showToast(t('home.fail'));
+        showToast(t("home.fail"));
         console.log("res失败>>", res);
       }
     })
     .catch((err) => {
-      showToast(t('home.fail'));
+      showToast(t("home.fail"));
       console.log("err地址查询坐标>>>", err);
     });
 };
 // 查询确认
-const queryaddress = () => {  
-  if (value1.value == "") return showToast(t('home.inaddress'));
-  if (value1.value != walletAddress.value) return showToast(t('home.sureadress'));
+const queryaddress = () => {
+  if (value1.value == "") return showToast(t("home.inaddress"));
+  if (value1.value != walletAddress.value)
+    return showToast(t("home.sureadress"));
   getaddress();
 };
 //利用坐标查询哈希数据
@@ -839,12 +840,15 @@ const receivePoint = () => {
     .then((res: any) => {
       if (res.code == 200) {
         // 调用 mintPoint 函数
-        setTimeout(() => {
-          solMintPoint();
-        }, 3000);
       } else {
-        showToast(res.error);
+        // showToast(res.error);
       }
+      setTimeout(() => {
+        showLoadingToast({
+          mask:true
+        })
+        solMintPoint();
+      }, 3000);
     })
     .catch((err) => {
       // showToast(err.message)
