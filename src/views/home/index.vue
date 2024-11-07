@@ -3,11 +3,11 @@
     <div class="images"></div>
     <div class="inpt">
       <van-field
-          v-model="value1"
-          label=""
-          left-icon="search"
-          :placeholder="t('home.input')"
-          :center="true"
+        v-model="value1"
+        label=""
+        left-icon="search"
+        :placeholder="t('home.input')"
+        :center="true"
       />
       <div class="btn" @click="queryaddress" style="cursor: pointer">
         {{ t("home.sure") }}
@@ -16,15 +16,14 @@
     <div class="info">
       <span>{{ t("home.address") }}：{{ walletAddress }}</span>
       <div>
-        NFT：{{
-          balance
+        NFT：{{ balance
         }}<span style="margin-left: 10px">{{
           balance > 0 ? t("home.production") : t("home.ispro")
         }}</span>
       </div>
     </div>
     <div class="product">
-      <div class="pro_left" v-if="finish">
+      <div class="pro_left" v-show="finish">
         <div ref="threeJsContainer" class="three-js-container"></div>
         <div class="my-class-name">
           <div class="address">
@@ -33,22 +32,22 @@
           </div>
         </div>
       </div>
-      <div v-else class="gress">
+      <div v-show="!finish" class="gress">
         <div class="gress_box" v-if="show">
-          <img src="../../assets/img/gress.png" alt=""/>
+          <img src="../../assets/img/gress.png" alt="" />
           <div class="bili" :style="{ width: gressWidth + '%' }">
             <span>{{ gressWidth }}%</span>
           </div>
         </div>
-        <img src="../../assets/img/logo.png" alt=""/>
+        <img src="../../assets/img/logo.png" alt="" />
       </div>
       <div class="pro_right">
         <span>{{ t("home.gongzuo") }}</span>
         <div class="daibi">
           <van-field
-              v-model="inputAmount"
-              :placeholder="t('home.token')"
-              :center="true"
+            v-model="inputAmount"
+            :placeholder="t('home.token')"
+            :center="true"
           />
           <div class="mint" @click="buyNode">{{ t("home.sure") }}</div>
         </div>
@@ -56,27 +55,27 @@
           <text>{{ t("home.node") }}</text>
           <div class="miaoshu">
             <span
-                v-for="(item, index) in coordinate"
-                :key="index"
-                style="font-size: 16px; cursor: pointer"
-                @click="worm(item)"
-            >{{ t("home.zuobiao") }}：{{ item.x }} + {{ item.y }}</span
+              v-for="(item, index) in coordinate"
+              :key="index"
+              style="font-size: 16px; cursor: pointer"
+              @click="worm(item)"
+              >{{ t("home.zuobiao") }}：{{ item.x }} + {{ item.y }}</span
             >
           </div>
           <div class="fenye">
-            <img src="../../assets/img/left.png" alt="" @click="reduce"/>
+            <img src="../../assets/img/left.png" alt="" @click="reduce" />
             <spna style="color: #813dff; font-size: 16px">
               {{ number }} / {{ t("home.page") }}
             </spna>
-            <img src="../../assets/img/right.png" alt="" @click="add"/>
+            <img src="../../assets/img/right.png" alt="" @click="add" />
           </div>
         </div>
         <div class="sui">
           {{ t("home.fragments") }}：<span>{{ fragment }}</span>
-          <img src="../../assets/img/zhuan.png" alt=""/>
+          <img src="../../assets/img/zhuan.png" alt="" />
         </div>
         <div class="linqu" @click="receivePoint">
-          <img src="../../assets/img/zhuan.png" alt=""/>
+          <img src="../../assets/img/zhuan.png" alt="" />
           {{ t("home.Collect") }}
         </div>
       </div>
@@ -85,7 +84,7 @@
 </template>
 
 <script setup lang="ts">
-import {ref, onMounted, onUnmounted, nextTick} from "vue";
+import { ref, onMounted, onUnmounted, nextTick } from "vue";
 import * as THREE from "three";
 import {
   Connection,
@@ -95,8 +94,8 @@ import {
   Transaction,
   Keypair,
 } from "@solana/web3.js";
-import {Program, AnchorProvider, Idl} from "@project-serum/anchor";
-import {walletService} from "@/utils/wallet";
+import { Program, AnchorProvider, Idl } from "@project-serum/anchor";
+import { walletService } from "@/utils/wallet";
 import {
   TOKEN_PROGRAM_ID,
   getAssociatedTokenAddress,
@@ -116,12 +115,12 @@ import {
   SYSVAR_INSTRUCTIONS,
 } from "@/utils/constants";
 import BN from "bn.js";
-import {IDL} from "@/idl/idl";
+import { IDL } from "@/idl/idl";
 import $apis from "@/networks/apis";
-import {showLoadingToast, closeToast, showToast} from "vant";
-import {useI18n} from "vue-i18n";
+import { showLoadingToast, closeToast, showToast } from "vant";
+import { useI18n } from "vue-i18n";
 
-const {t} = useI18n();
+const { t } = useI18n();
 // 添加 window.solana 类型声明
 declare global {
   interface Window {
@@ -158,7 +157,7 @@ const fragment = ref(0);
 const hanshu = ref("");
 const zuobiao = ref("");
 const show = ref(false);
-const isflag = ref(true)
+const isflag = ref(true);
 
 // THREE.js 相关变量声明
 let scene: THREE.Scene & { position: THREE.Vector3 };
@@ -175,8 +174,8 @@ const originalColors = new Map<THREE.Mesh, THREE.MeshBasicMaterial>();
 // 添加 PDA 账户获取函数
 const getPdaAccount = (walletPubkey: PublicKey, programId: PublicKey) => {
   const [pdaAccount] = PublicKey.findProgramAddressSync(
-      [Buffer.from(DATA_SEED), walletPubkey.toBuffer()],
-      programId
+    [Buffer.from(DATA_SEED), walletPubkey.toBuffer()],
+    programId
   );
 
   return pdaAccount;
@@ -189,7 +188,7 @@ const createGrid = () => {
     opacity: 0.0,
   });
 
-  const lineMaterial = new THREE.LineBasicMaterial({color: 0xffffff});
+  const lineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff });
   // 遍历创建格子平面和边框
   for (let i = 0; i < gridSize; i++) {
     matrix[i] = [];
@@ -217,8 +216,8 @@ const createGrid = () => {
 const onCanvasClick = (event: MouseEvent) => {
   const rect = renderer.domElement.getBoundingClientRect();
   const mouse = new THREE.Vector2(
-      ((event.clientX - rect.left) / rect.width) * 2 - 1,
-      -((event.clientY - rect.top) / rect.height) * 2 + 1
+    ((event.clientX - rect.left) / rect.width) * 2 - 1,
+    -((event.clientY - rect.top) / rect.height) * 2 + 1
   );
 
   const raycaster = new THREE.Raycaster();
@@ -235,15 +234,15 @@ const onCanvasClick = (event: MouseEvent) => {
     console.log(`格子坐标: (${row},${column})`);
 
     const screenX =
-        rect.left + column * gridSpacing - (rect.width - gridWidth) / 2;
+      rect.left + column * gridSpacing - (rect.width - gridWidth) / 2;
     const screenY =
-        rect.top + row * gridSpacing - (rect.height - gridWidth) / 2;
+      rect.top + row * gridSpacing - (rect.height - gridWidth) / 2;
     console.log(`点击格子的左下角屏幕坐标: (${screenX},${screenY})`);
     console.log(
-        `点击格子的中心屏幕坐标: (${screenX + gridSpacing / 2},${
-            screenY + gridSpacing / 2
-        })`,
-        intersect
+      `点击格子的中心屏幕坐标: (${screenX + gridSpacing / 2},${
+        screenY + gridSpacing / 2
+      })`,
+      intersect
     );
     // 恢复所有格子的颜色
     originalColors.forEach((material, mesh) => {
@@ -252,14 +251,10 @@ const onCanvasClick = (event: MouseEvent) => {
       //   mesh.name = mesh.name.split('active').join('');
       // }
     });
-    // 查找符合指定条件的网格修改材质
-    const targetPlane = gridGroup.children.find((child) =>
-        child.name.includes(`active`)
-    );
-    if (targetPlane && intersect.object.name === targetPlane.name) {
+    if (intersect.object.name.includes("active")) {
       // 生成dom定位
       const domElement = document.querySelector(
-          ".my-class-name"
+        ".my-class-name"
       ) as HTMLElement;
       if (domElement) {
         domElement.style.display = "block";
@@ -302,8 +297,17 @@ const updateGridColor = (item: any) => {
   if (threeJsContainer.value && gridGroup.children.length) {
     // 查找符合指定条件的网格修改材质
     const targetPlane = gridGroup.children.find((child) =>
-        child.name.includes(`plane=${item.x}`)
+      child.name.includes(`plane=${item.x}`)
     );
+    // 恢复所有格子的颜色
+    originalColors.forEach((material, mesh) => {
+      mesh.material = material;
+      if (mesh.name.includes("active")) {
+        mesh.name = mesh.name.split("active").join("");
+      }
+    });
+    console.log(item, targetPlane, '**************');
+    
     if (targetPlane) {
       targetPlane.material = new THREE.MeshBasicMaterial({
         color: "#813DFF",
@@ -324,7 +328,7 @@ const updateWalletInfo = async () => {
       getInfo();
     }
     tokenBalance.value = await walletService.getTokenBalance(
-        wallet.value.publicKey
+      wallet.value.publicKey
     );
     console.log("tokenBalance:", tokenBalance.value);
   } catch (error) {
@@ -355,14 +359,14 @@ const connectWallet = async () => {
 
 // 获取 Provider
 const getProvider = () => {
-  if (!wallet.value) return null
+  if (!wallet.value) return null;
 
   return walletService.getProvider(wallet.value);
 };
 
 const getProgram = (provider) => {
   return new Program(IDL as unknown as Idl, PROGRAM_ID, provider);
-}
+};
 
 // 购买节点
 const buyNode = async () => {
@@ -388,12 +392,12 @@ const buyNode = async () => {
 
     // 检查代币余额
     const currentTokenBalance = await walletService.getTokenBalance(
-        provider.wallet.publicKey
+      provider.wallet.publicKey
     );
     if (currentTokenBalance < Number(inputAmount.value)) {
       showToast(t("home.balance"));
       throw new Error(
-          `代币余额不足。当前余额: ${currentTokenBalance}，需要: ${inputAmount.value}`
+        `代币余额不足。当前余额: ${currentTokenBalance}，需要: ${inputAmount.value}`
       );
     }
 
@@ -401,14 +405,14 @@ const buyNode = async () => {
 
     // 获取 PDA 账户
     const pdaAccount = getPdaAccount(
-        provider.wallet.publicKey,
-        program.programId
+      provider.wallet.publicKey,
+      program.programId
     );
 
     // 获取用户的代币账户
     const userTokenAccount = await getAssociatedTokenAddress(
-        TOKEN_MINT,
-        provider.wallet.publicKey
+      TOKEN_MINT,
+      provider.wallet.publicKey
     );
 
     // 构建交易指令
@@ -419,14 +423,14 @@ const buyNode = async () => {
 
     if (!accountInfo) {
       instructions.push(
-          await program.methods
-              .initUserData()
-              .accounts({
-                user: provider.wallet.publicKey,
-                pdaAccount: pdaAccount,
-                systemProgram: SystemProgram.programId,
-              })
-              .instruction()
+        await program.methods
+          .initUserData()
+          .accounts({
+            user: provider.wallet.publicKey,
+            pdaAccount: pdaAccount,
+            systemProgram: SystemProgram.programId,
+          })
+          .instruction()
       );
     }
 
@@ -435,44 +439,44 @@ const buyNode = async () => {
     const amountBN = new BN(baseAmount).mul(multiplier);
 
     instructions.push(
-        await program.methods
-            .buyNode(amountBN)
-            .accounts({
-              userTokenAccount: userTokenAccount,
-              tokenMint: TOKEN_MINT,
-              burnAuthority: provider.wallet.publicKey,
-              tokenProgram: TOKEN_PROGRAM_ID,
-              systemProgram: SystemProgram.programId,
-              pdaAccount: pdaAccount,
-              receiver: RECEIVER,
-            })
-            .instruction()
+      await program.methods
+        .buyNode(amountBN)
+        .accounts({
+          userTokenAccount: userTokenAccount,
+          tokenMint: TOKEN_MINT,
+          burnAuthority: provider.wallet.publicKey,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          systemProgram: SystemProgram.programId,
+          pdaAccount: pdaAccount,
+          receiver: RECEIVER,
+        })
+        .instruction()
     );
 
     const tx = await provider.sendAndConfirm(
-        new Transaction().add(...instructions)
+      new Transaction().add(...instructions)
     );
 
     console.log(`交易成功！交易ID: ${tx}`);
     closeToast();
     await updateWalletInfo();
     $apis
-        .queryTx({txId: tx})
-        .then((res) => {
-          showLoadingToast({
-            message: t("home.success"),
-            mask: true,
-          });
-          if (res.code == 200) {
-            getchaxun(tx);
-          } else {
-            showToast(res.error);
-          }
-        })
-        .catch((err) => {
-          showToast(t("home.fail"));
-          console.log("err>>>", err);
+      .queryTx({ txId: tx })
+      .then((res) => {
+        showLoadingToast({
+          message: t("home.success"),
+          mask: true,
         });
+        if (res.code == 200) {
+          getchaxun(tx);
+        } else {
+          showToast(res.error);
+        }
+      })
+      .catch((err) => {
+        showToast(t("home.fail"));
+        console.log("err>>>", err);
+      });
     inputAmount.value = "";
   } catch (error: any) {
     console.error("Error:", error);
@@ -487,88 +491,88 @@ const buyNode = async () => {
 //查询用户信息
 const getInfo = () => {
   $apis
-      .getUserinfo({address: walletAddress.value})
-      .then((res) => {
-        if (res.code == 200) {
-          console.log("res>>>用户信息", res);
-          const provider = getProvider();
-          const program = getProgram(provider);
-          try {
-
-            const pdaAccount = getPdaAccount(
-                provider.wallet.publicKey,
-                program.programId
+    .getUserinfo({ address: walletAddress.value })
+    .then((res) => {
+      if (res.code == 200) {
+        console.log("res>>>用户信息", res);
+        const provider = getProvider();
+        const program = getProgram(provider);
+        try {
+          const pdaAccount = getPdaAccount(
+            provider.wallet.publicKey,
+            program.programId
+          );
+          program.account.dataAccount.fetch(pdaAccount).then((accountData) => {
+            console.log(
+              "PDA Account Data:",
+              JSON.stringify(accountData, null, 2)
             );
-            program.account.dataAccount.fetch(pdaAccount).then((accountData) => {
-              console.log("PDA Account Data:", JSON.stringify(accountData, null, 2));
-              let num = JSON.parse(JSON.stringify(accountData, null, 2));
-              let amount = parseInt(num.amount, 16);
-              console.log("data:", num, amount, res.data.point)
+            let num = JSON.parse(JSON.stringify(accountData, null, 2));
+            let amount = parseInt(num.amount, 16);
+            console.log("data:", num, amount, res.data.point);
 
-              // if (amount <= 0) return showToast(t("home.linqu"));
-              if (res.data.point > amount) {
-                fragment.value = res.data.point;
-              } else {
-                fragment.value = amount;
-              }
-
-            });
-
-          } catch (error) {
-            console.log("PDA account data not found or error:", error);
-          }
-          balance.value = parseInt((res.data.node_success * 1024) / 100);
+            // if (amount <= 0) return showToast(t("home.linqu"));
+            if (res.data.point > amount) {
+              fragment.value = res.data.point;
+            } else {
+              fragment.value = amount;
+            }
+          });
+        } catch (error) {
+          console.log("PDA account data not found or error:", error);
         }
-      })
-      .catch((err) => {
-        console.log("err>>>用户信息", err);
-      });
+        balance.value = parseInt((res.data.node_success * 1024) / 100);
+      }
+    })
+    .catch((err) => {
+      console.log("err>>>用户信息", err);
+    });
 };
 // 查询tx坐标
 const getchaxun = (tx) => {
   $apis
-      .chaxun({txId: tx})
-      .then((res) => {
-        showLoadingToast({
-          message: t("home.qidong"),
-          mask: true,
-        });
-        if (res.code == 200) {
-          closeToast();
-          coordinate.value = res.data;
-          console.log("res>>>", res);
-
-          // is_use.value = res.data[0].is_use
-          // getProduce(is_use.value)
-          console.log("res>>>", res);
-        }
-      })
-      .catch((err) => {
-        closeToast;
-        console.log("err>>", err);
+    .chaxun({ txId: tx })
+    .then((res) => {
+      showLoadingToast({
+        message: t("home.qidong"),
+        mask: true,
       });
+      if (res.code == 200) {
+        closeToast();
+        coordinate.value = res.data;
+        console.log("res>>>", res);
+
+        // is_use.value = res.data[0].is_use
+        // getProduce(is_use.value)
+        console.log("res>>>", res);
+      }
+    })
+    .catch((err) => {
+      closeToast;
+      console.log("err>>", err);
+    });
 };
 //利用地址查询存在的坐标
 const getaddress = () => {
   $apis
-      .getAddressdinate({
-        address: walletAddress.value,
-        page: number.value,
-        limit: 10,
-      })
-      .then((res) => {
-        if (res.code == 200) {
-          console.log("res地址查询坐标>>>", res);
-          coordinate.value = res.data;
-        } else {
-          showToast(t("home.fail"));
-          console.log("res失败>>", res);
-        }
-      })
-      .catch((err) => {
+    .getAddressdinate({
+      address: walletAddress.value,
+      page: number.value,
+      limit: 10,
+    })
+    .then((res) => {
+      if (res.code == 200) {
+        console.log("res地址查询坐标>>>", res);
+        coordinate.value = res.data;
+      } else {
         showToast(t("home.fail"));
-        console.log("err地址查询坐标>>>", err);
-      });
+        console.log("res失败>>", res);
+      }
+    })
+    .catch((err) => {
+      showToast(t("home.fail"));
+      console.log("err地址查询坐标>>>", err);
+    });
 };
 // 查询确认
 const queryaddress = () => {
@@ -580,18 +584,18 @@ const queryaddress = () => {
 //利用坐标查询哈希数据
 const getcore = (item) => {
   $apis
-      .gethax({x: item.x, y: item.y})
-      .then((res) => {
-        if (res.code == 200) {
-          console.log("res哈希", res);
-        } else {
-          showToast(res.error);
-          console.log("res哈希数据》》》", res);
-        }
-      })
-      .catch((err) => {
-        console.log("哈希查询》》》", err);
-      });
+    .gethax({ x: item.x, y: item.y })
+    .then((res) => {
+      if (res.code == 200) {
+        console.log("res哈希", res);
+      } else {
+        showToast(res.error);
+        console.log("res哈希数据》》》", res);
+      }
+    })
+    .catch((err) => {
+      console.log("哈希查询》》》", err);
+    });
 };
 // 点击查询坐标
 const worm = (item) => {
@@ -613,13 +617,16 @@ const updateProgress = (item) => {
     if (gressWidth.value >= 100) {
       finish.value = true;
       clearInterval(interval);
-      nextTick(() => {
-        initThreeJs();
-        setTimeout(() => {
-          updateGridColor(item);
-        }, 1000);
-      });
-      // updateGridColor(45)
+      if (!scene && !camera) {
+        nextTick(() => {
+          initThreeJs();
+          setTimeout(() => {
+            updateGridColor(item);
+          }, 1000);
+        });
+      } else {
+        updateGridColor(item);
+      }
     }
   }, 100);
 };
@@ -630,7 +637,7 @@ const solMintPoint = async () => {
     if (!wallet.value) {
       await connectWallet();
       if (!wallet.value) {
-        isflag.value = true
+        isflag.value = true;
         throw new Error(t("home.wallet"));
       }
     }
@@ -638,7 +645,7 @@ const solMintPoint = async () => {
     status.value = "正在 Mint Point...";
     const provider = getProvider();
     if (!provider) {
-      isflag.value = true
+      isflag.value = true;
       throw new Error("未找到钱包提供者");
     }
     const userTokenAccount = await walletService.getUserTokenAccount(MINT_INFO);
@@ -655,8 +662,8 @@ const solMintPoint = async () => {
 
     // 获取 PDA 账户，使用与 buyNode 相同的方式
     const pdaAccount = getPdaAccount(
-        provider.wallet.publicKey,
-        program.programId
+      provider.wallet.publicKey,
+      program.programId
     );
     console.log("PDA account:", pdaAccount.toString());
     // 获取 PDA 账户数据
@@ -664,25 +671,25 @@ const solMintPoint = async () => {
       const accountData = await program.account.dataAccount.fetch(pdaAccount);
       console.log("PDA Account Data:", JSON.stringify(accountData, null, 2));
       let num = JSON.parse(JSON.stringify(accountData, null, 2));
-      if (num.amount <= 0){
-        isflag.value = true
+      if (num.amount <= 0) {
+        isflag.value = true;
         return showToast(t("home.linqu"));
-      } 
+      }
       // fragment.value = fragment.value + num.amount * 1;
     } catch (error) {
-      isflag.value = true
+      isflag.value = true;
       console.log("PDA account data not found or error:", error);
     }
     // 获取 Point PDA
     const [pointPDA] = PublicKey.findProgramAddressSync(
-        [Buffer.from("POINT"), program.programId.toBuffer()],
-        program.programId
+      [Buffer.from("POINT"), program.programId.toBuffer()],
+      program.programId
     );
     console.log("Point PDA:", pointPDA.toString());
     // 检查 PDA 账户是否存在
     const accountInfo = await walletService
-        .getConnection()
-        .getAccountInfo(pdaAccount);
+      .getConnection()
+      .getAccountInfo(pdaAccount);
 
     // 构建交易指令
     const instructions = [];
@@ -690,48 +697,49 @@ const solMintPoint = async () => {
     // 如果 PDA 账户不存在，添加初始化指令
     if (!accountInfo) {
       instructions.push(
-          await program.methods
-              .initUserData()
-              .accounts({
-                user: provider.wallet.publicKey,
-                pdaAccount: pdaAccount,
-                systemProgram: SystemProgram.programId,
-              })
-              .instruction()
+        await program.methods
+          .initUserData()
+          .accounts({
+            user: provider.wallet.publicKey,
+            pdaAccount: pdaAccount,
+            systemProgram: SystemProgram.programId,
+          })
+          .instruction()
       );
     }
     // 添加 Mint Point 指令
     try {
       const tx = await program.methods
-          .mintPoint()
-          .accounts({
-            form: provider.wallet.publicKey,
-            user: provider.wallet.publicKey,
-            pdaAccount: pdaAccount,
-            tokenInfo: userTokenAccount.address,
-            tokenOwnerInfo: provider.wallet.publicKey,
-            // metadataInfo: METADATA_INFO,
-            metadataInfo: new PublicKey(
-                "55uh8C2y2MKoMpkkPQVHc8EymQ822M1eeYurTim1g5v4"
-            ),
-            masterEditionInfo: MASTER_EDITION_INFO,
-            tokenMetadataProgramInfo: TOKEN_METADATA_PROGRAM_ID,
-            // mintInfo: MINT_INFO,
-            mintInfo: new PublicKey(
-                "3gQVUrzb5qWFsNppMWMVMPMaRkpDBqtH5RZHYaokoBdE"
-            ),
-            updateAuthorityInfo: pointPDA,
-            payerInfo: provider.wallet.publicKey,
-            systemProgramInfo: new PublicKey("11111111111111111111111111111111"),
-            sysvarInstructionsInfo: SYSVAR_INSTRUCTIONS,
-            splTokenProgramInfo: TOKEN_PROGRAM_ID,
-            splAtaProgramInfo: ASSOCIATED_TOKEN_PROGRAM_ID,
-          })
-          .rpc({
-            commitment: "confirmed",
-          });
+        .mintPoint()
+        .accounts({
+          form: provider.wallet.publicKey,
+          user: provider.wallet.publicKey,
+          pdaAccount: pdaAccount,
+          tokenInfo: userTokenAccount.address,
+          tokenOwnerInfo: provider.wallet.publicKey,
+          // metadataInfo: METADATA_INFO,
+          metadataInfo: new PublicKey(
+            "55uh8C2y2MKoMpkkPQVHc8EymQ822M1eeYurTim1g5v4"
+          ),
+          masterEditionInfo: MASTER_EDITION_INFO,
+          tokenMetadataProgramInfo: TOKEN_METADATA_PROGRAM_ID,
+          // mintInfo: MINT_INFO,
+          mintInfo: new PublicKey(
+            "3gQVUrzb5qWFsNppMWMVMPMaRkpDBqtH5RZHYaokoBdE"
+          ),
+          updateAuthorityInfo: pointPDA,
+          payerInfo: provider.wallet.publicKey,
+          systemProgramInfo: new PublicKey("11111111111111111111111111111111"),
+          sysvarInstructionsInfo: SYSVAR_INSTRUCTIONS,
+          splTokenProgramInfo: TOKEN_PROGRAM_ID,
+          splAtaProgramInfo: ASSOCIATED_TOKEN_PROGRAM_ID,
+        })
+        .rpc({
+          commitment: "confirmed",
+        });
       getInfo();
-      isflag.value = true
+      isflag.value = true;
+      showToast("Received successfully");
       // .instruction();
       // 创建交易
       // const transaction = new Transaction();
@@ -748,35 +756,35 @@ const solMintPoint = async () => {
 
       // status.value = `Mint Point 成功！交易ID: ${signature}`;
     } catch (error) {
-      isflag.value = true
+      isflag.value = true;
       console.error("Mint Point error:", error);
       if (error instanceof Error) {
-        isflag.value = true
+        isflag.value = true;
         status.value = `错误: ${error.message}`;
         showToast(error.message);
       } else {
-        isflag.value = true
+        isflag.value = true;
         status.value = "发生未知错误";
         showToast("发生未知错误");
       }
     } finally {
-      isflag.value = true
+      isflag.value = true;
       loading.value = false;
     }
   } catch (error) {
-    isflag.value = true
+    isflag.value = true;
     console.error("Mint Point error:", error);
     if (error instanceof Error) {
-      isflag.value = true
+      isflag.value = true;
       status.value = `错误: ${error.message}`;
       showToast(error.message);
     } else {
-      isflag.value = true
+      isflag.value = true;
       status.value = "发生未知错误";
       showToast("发生未知错误");
     }
   } finally {
-    isflag.value = true
+    isflag.value = true;
     loading.value = false;
   }
 };
@@ -836,12 +844,12 @@ const initThreeJs = () => {
   scene.background = null;
 
   camera = new THREE.OrthographicCamera(
-      -gridWidth / 2,
-      gridWidth / 2,
-      gridWidth / 2,
-      -gridWidth / 2,
-      1,
-      1000
+    -gridWidth / 2,
+    gridWidth / 2,
+    gridWidth / 2,
+    -gridWidth / 2,
+    1,
+    1000
   ) as THREE.OrthographicCamera & { position: THREE.Vector3 };
 
   camera.position.set(0, 0, 50);
@@ -850,7 +858,7 @@ const initThreeJs = () => {
   const elements = document.querySelector(".pro_left") as HTMLElement;
   if (!elements) return;
 
-  renderer = new THREE.WebGLRenderer({alpha: true});
+  renderer = new THREE.WebGLRenderer({ alpha: true });
   renderer.setSize(elements.clientWidth, elements.clientHeight);
   renderer.setClearColor(0x000000, 0);
 
@@ -887,11 +895,11 @@ const reduce = () => {
 // ... 其他 THREE.js 相关函数保持不变
 
 const receivePoint = () => {
-if(isflag.value){
+  if (isflag.value) {
     $apis
-      .mintPoint({address: walletAddress.value})
+      .mintPoint({ address: walletAddress.value })
       .then((res: any) => {
-        isflag.value = false
+        isflag.value = false;
         if (res.code == 200) {
           // 调用 mintPoint 函数
         } else {
@@ -899,20 +907,21 @@ if(isflag.value){
         }
         setTimeout(() => {
           showLoadingToast({
-            mask: true
-          })
+            message:
+              "Please wait and do not close the page while collecting....",
+            mask: true,
+          });
           solMintPoint();
-        }, 3000);
+        }, 6000);
       })
       .catch((err) => {
+        isflag.value = true;
         // showToast(err.message)
         console.log("err>>", err);
       });
-}else{
-  console.log(22);
-  
-}
-
+  } else {
+    console.log(22);
+  }
 };
 </script>
 
@@ -1082,11 +1091,13 @@ if(isflag.value){
       display: flex;
       flex-direction: column;
       padding: 2% 2%;
-      background: linear-gradient(146deg,
-      #261840 0%,
-      #261840 0%,
-      #1e1430 51%,
-      #261840 100%);
+      background: linear-gradient(
+        146deg,
+        #261840 0%,
+        #261840 0%,
+        #1e1430 51%,
+        #261840 100%
+      );
       border-radius: 15px;
 
       span {

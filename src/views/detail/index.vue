@@ -99,11 +99,11 @@ const getaddress = () => {
       page: currentPage.value,
       limit: 30,
     })
-    .then((res) => {
+    .then((res:any) => {
       if (res.code == 200) {
         let redcuo = res.data
         if(redcuo.length==0) return showToast("t('detail.emtype')")
-        count.value = res.count
+        count.value =Math.ceil(res.count/30)
         redcuo.forEach((item,index)=>{
            item.hash = item.tx.substring(0, 4) + "......" + item.tx.slice(-4);
         })
