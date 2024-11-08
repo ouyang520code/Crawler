@@ -40,7 +40,8 @@ const en: LocaleTokens = {
     quantity:"Please enter the token and the synthesis quantity",
     Obtain:"Obtain quantity",
     err:"Unknown error occurred",
-    mint:"Maximum of 10 mints per session"
+    mint:"Maximum of 10 mints per session",
+    information:"Crawler information query"
   },
   detail: {
     emtype:"No more data available at the moment~",

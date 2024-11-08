@@ -40,7 +40,8 @@ const zh: LocaleTokens = {
     quantity:"请输入代币输入合成数量",
     Obtain:"获得数量",
     err:"发生未知错误",
-    mint:"一次最多mint10个"
+    mint:"一次最多mint10个",
+    information:"爬虫信息查询"
   },
   detail: {
     emtype:"暂无更多数据~",

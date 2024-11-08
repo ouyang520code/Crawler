@@ -1,6 +1,6 @@
 <template>
   <div class="minxi">
-    <div class="biaoti">爬虫信息查询</div>
+    <div class="biaoti">{{t("pool.information")}}</div>
     <div class="inpt">
       <van-field
         v-model="value1"
@@ -223,13 +223,14 @@ onUnmounted(() => {
   padding-bottom: 70px;
   background: linear-gradient(135deg, #271844 0%, #0d0d0d 55%, #261842 100%);
   .biaoti {
-    width: 204px;
+    width: 600px;
     height: 34px;
     font-family: SimHei, SimHei;
     font-weight: 400;
     font-size: 34px;
     color: #ffffff;
     margin: 4% auto;
+    text-align: center;
   }
   .inpt {
     width: 70%;

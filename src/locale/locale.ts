@@ -41,6 +41,7 @@ export type LocaleTokens = {
     Obtain:string;
     err:string;
     mint:string;
+    information:string
   };
   detail: {
     emtype:string;
