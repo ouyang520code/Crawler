@@ -418,12 +418,12 @@ const buyNode = async () => {
     const currentTokenBalance = await walletService.getTokenBalance(
       provider.wallet.publicKey
     );
-    if (currentTokenBalance < Number(inputAmount.value)) {
-      showToast(t("home.balance"));
-      throw new Error(
-        `代币余额不足。当前余额: ${currentTokenBalance}，需要: ${inputAmount.value}`
-      );
-    }
+    // if (currentTokenBalance < Number(inputAmount.value)) {
+    //   showToast(t("home.balance"));
+    //   throw new Error(
+    //     `代币余额不足。当前余额: ${currentTokenBalance}，需要: ${inputAmount.value}`
+    //   );
+    // }
 
     const program = new Program(IDL as unknown as Idl, PROGRAM_ID, provider);
 
