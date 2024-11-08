@@ -18,7 +18,7 @@ request.interceptors.request.use(
   (config) => {
     // const token = useUserStore().token;
     showLoadingToast({
-      message: "加载中...",
+      message: "Loading in progress....",
       forbidClick: true,
     });
     const token = localStorage.getItem("token");

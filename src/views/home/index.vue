@@ -403,11 +403,12 @@ const buyNode = async () => {
     }
 
     loading.value = true;
-    status.value = "交易处理中...";
-    showLoadingToast({
+    status.value = "Transaction processing in progress...";
+      showLoadingToast({
       message: status.value,
       forbidClick: true,
     });
+
     const provider = getProvider();
     if (!provider) {
       showToast(t("home.provider"));
@@ -481,9 +482,7 @@ const buyNode = async () => {
       new Transaction().add(...instructions)
     );
     console.log(`交易成功！交易ID: ${tx}`);
-    if(tx){
     closeToast();
-    }
     await updateWalletInfo();
     $apis
       .queryTx({ txId: tx })
