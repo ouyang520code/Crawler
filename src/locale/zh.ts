@@ -41,7 +41,8 @@ const zh: LocaleTokens = {
     Obtain:"获得数量",
     err:"发生未知错误",
     mint:"一次最多mint10个",
-    information:"爬虫信息查询"
+    information:"爬虫信息查询",
+    zushi:"注：100个碎片可以合成一个NFT"
   },
   detail: {
     emtype:"暂无更多数据~",

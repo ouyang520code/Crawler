@@ -48,8 +48,8 @@
         </div>
         <div class="sure" @click="solMintNft" style="cursor: pointer">
           MINT
-          <!-- {{ t("home.sure") }} -->
         </div>
+        <div class="zushi">{{t("pool.zushi")}}</div>
       </div>
     </div>
   </div>
@@ -661,8 +661,16 @@ onUnmounted(() => {
         line-height: 76px;
         text-align: center;
         background: linear-gradient(to bottom, #703dff, #813dff);
-        margin-top: 100px;
+        margin-top: 60px;
         border-radius: 48px;
+      }
+      .zushi{
+        width: 92%;
+        color: #ffffff;
+        font-size: 24px;
+        margin-top: 30px;
+         word-wrap: break-word;
+        word-break: break-all;
       }
     }
   }
@@ -807,8 +815,16 @@ onUnmounted(() => {
           color: white;
           line-height: 48px;
           text-align: center;
-          margin-top: 60px;
+          margin-top: 20px;
         }
+        .zushi{
+        width: 92%;
+        color: #ffffff;
+        font-size: 18px;
+        margin-top: 15px;
+         word-wrap: break-word;
+        word-break: break-all;
+      }
       }
     }
   }

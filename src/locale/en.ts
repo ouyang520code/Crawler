@@ -41,7 +41,8 @@ const en: LocaleTokens = {
     Obtain:"Obtain quantity",
     err:"Unknown error occurred",
     mint:"Maximum of 10 mints per session",
-    information:"Crawler information query"
+    information:"Crawler information query",
+    zushi:"Note: 100 fragments can be combined into one NFT"
   },
   detail: {
     emtype:"No more data available at the moment~",
