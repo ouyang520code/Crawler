@@ -1,80 +1,84 @@
-import { Connection, PublicKey, LAMPORTS_PER_SOL, clusterApiUrl } from '@solana/web3.js'
-import { AnchorProvider } from '@project-serum/anchor'
-import { PhantomWalletAdapter } from '@solana/wallet-adapter-phantom'
-import { TOKEN_MINT } from './constants'
+import {
+  Connection,
+  PublicKey,
+  LAMPORTS_PER_SOL,
+  clusterApiUrl,
+} from "@solana/web3.js";
+import { AnchorProvider } from "@project-serum/anchor";
+import { PhantomWalletAdapter } from "@solana/wallet-adapter-phantom";
+import { TOKEN_MINT } from "./constants";
 import { getAssociatedTokenAddress } from "@solana/spl-token";
 import { createAssociatedTokenAccountInstruction } from "@solana/spl-token";
 import { Transaction } from "@solana/web3.js";
+import { showFailToast, showToast } from "vant";
 
 // 导出钱包适配器
-export const wallets = [
-  new PhantomWalletAdapter()
-]
+export const wallets = [new PhantomWalletAdapter()];
 
 // 导出网络端点
-export const endpoint = clusterApiUrl('devnet')
+export const endpoint = clusterApiUrl("devnet");
 
 export class WalletService {
   constructor() {
-    this.connection = new Connection(endpoint)
+    this.connection = new Connection(endpoint);
     this.callbacks = {
       onConnect: null,
-      onDisconnect: null
-    }
-    this.wallet = null
+      onDisconnect: null,
+    };
+    this.wallet = null;
   }
 
   // 检查钱包是否已安装
   checkWalletInstalled() {
-    return 'solana' in window && window.solana.isPhantom
+    return "solana" in window && window.solana.isPhantom;
   }
 
   // 获取钱包实例
   getPhantomWallet() {
-    return window.solana
+    return window.solana;
   }
 
   // 连接钱包
   async connectWallet() {
     try {
-      const wallet = this.getPhantomWallet()
+      const wallet = this.getPhantomWallet();
       if (!wallet) {
-        throw new Error('请安装 Phantom 钱包')
+        throw new Error("请安装 Phantom 钱包");
       }
-      await wallet.connect()
-      this.wallet = wallet
-      return wallet
+      await wallet.connect();
+      this.wallet = wallet;
+      return wallet;
     } catch (error) {
-      console.error('Wallet connection error:', error)
-      throw error
+      console.error("Wallet connection error:", error);
+      throw error;
     }
   }
 
   // 获取 Provider
   getProvider(wallet) {
-    if (!wallet) return null
+    if (!wallet) return null;
     return new AnchorProvider(
       this.connection,
       {
         publicKey: wallet.publicKey,
-        signTransaction: message => wallet.signTransaction(message),
-        signAllTransactions: messages => wallet.signAllTransactions(messages),
+        signTransaction: (message) => wallet.signTransaction(message),
+        signAllTransactions: (messages) => wallet.signAllTransactions(messages),
       },
       {
-        preflightCommitment: 'confirmed',
-        commitment: 'confirmed'
+        preflightCommitment: "confirmed",
+        commitment: "confirmed",
       }
-    )
+    );
   }
 
   // 获取 SOL 余额
   async getSolBalance(publicKey) {
     try {
-      const balance = await this.connection.getBalance(publicKey)
-      return balance / LAMPORTS_PER_SOL
+      const balance = await this.connection.getBalance(publicKey);
+      return balance / LAMPORTS_PER_SOL;
     } catch (error) {
-      console.error('Error getting SOL balance:', error)
-      return 0
+      console.error("Error getting SOL balance:", error);
+      return 0;
     }
   }
 
@@ -82,13 +86,13 @@ export class WalletService {
   async getTokenBalance(owner, mint = TOKEN_MINT) {
     try {
       if (!owner) {
-        console.warn('No owner provided for getTokenBalance');
+        console.warn("No owner provided for getTokenBalance");
         return 0;
       }
 
       // 验证 mint 地址
       if (!mint) {
-        console.warn('No mint address provided for getTokenBalance');
+        console.warn("No mint address provided for getTokenBalance");
         return 0;
       }
 
@@ -101,15 +105,16 @@ export class WalletService {
 
       // 获取代币余额
       try {
-        const accountInfo = await this.connection.getTokenAccountBalance(tokenAccount.address);
+        const accountInfo = await this.connection.getTokenAccountBalance(
+          tokenAccount.address
+        );
         return accountInfo.value.uiAmount || 0;
       } catch (error) {
-        console.error('Error getting token balance:', error);
+        console.error("Error getting token balance:", error);
         return 0;
       }
-
     } catch (error) {
-      console.error('Error getting token balance:', error);
+      console.error("Error getting token balance:", error);
       // 对于任何错误，返回0而不是抛出错误
       return 0;
     }
@@ -117,80 +122,82 @@ export class WalletService {
 
   // 检查用户取消
   isUserRejection(error) {
-    if (!error?.message) return false
-    const message = error.message.toLowerCase()
-    return message.includes('user rejected') ||
-           message.includes('user canceled') ||
-           message.includes('user cancelled') ||
-           message.includes('transaction cancelled') ||
-           message.includes('rejected the request') ||
-           message.includes('user denied') ||
-           message.includes('declined by user')
+    if (!error?.message) return false;
+    const message = error.message.toLowerCase();
+    return (
+      message.includes("user rejected") ||
+      message.includes("user canceled") ||
+      message.includes("user cancelled") ||
+      message.includes("transaction cancelled") ||
+      message.includes("rejected the request") ||
+      message.includes("user denied") ||
+      message.includes("declined by user")
+    );
   }
 
   // 设置回调
   setCallbacks(callbacks) {
     this.callbacks = {
       onConnect: (wallet) => {
-        this.wallet = wallet
-        callbacks.onConnect?.(wallet)
+        this.wallet = wallet;
+        callbacks.onConnect?.(wallet);
       },
       onDisconnect: () => {
-        this.wallet = null
-        callbacks.onDisconnect?.()
-      }
-    }
+        this.wallet = null;
+        callbacks.onDisconnect?.();
+      },
+    };
   }
 
   // 初始化钱包监听
   initWalletListeners() {
-    const wallet = this.getPhantomWallet()
+    const wallet = this.getPhantomWallet();
     if (wallet) {
       // 移除旧的监听器
-      this.removeWalletListeners()
+      this.removeWalletListeners();
 
       // 添加新的监听器
-      wallet.on('connect', () => {
-        console.log('Wallet connected event')
-        this.callbacks.onConnect?.(wallet)
-      })
+      wallet.on("connect", () => {
+        console.log("Wallet connected event");
+        this.callbacks.onConnect?.(wallet);
+      });
 
-      wallet.on('disconnect', () => {
-        console.log('Wallet disconnected event')
-        this.callbacks.onDisconnect?.()
-      })
+      wallet.on("disconnect", () => {
+        console.log("Wallet disconnected event");
+        this.callbacks.onDisconnect?.();
+      });
 
       // 检查是否已连接
       if (wallet.isConnected) {
-        this.callbacks.onConnect?.(wallet)
+        this.callbacks.onConnect?.(wallet);
       }
 
-      return true
+      return true;
     }
-    return false
+    return false;
   }
 
   // 移除钱包监听
   removeWalletListeners() {
-    const wallet = this.getPhantomWallet()
+    const wallet = this.getPhantomWallet();
     if (wallet) {
-      wallet.removeAllListeners('connect')
-      wallet.removeAllListeners('disconnect')
+      wallet.removeAllListeners("connect");
+      wallet.removeAllListeners("disconnect");
     }
   }
 
   // 清理
   cleanup() {
-    this.removeWalletListeners()
+    this.removeWalletListeners();
     this.callbacks = {
       onConnect: null,
-      onDisconnect: null
-    }
+      onDisconnect: null,
+    };
   }
 
   // 获取 connection 实例
   getConnection() {
-    return this.connection
+    return this.connection;
   }
 
   /**
@@ -199,6 +206,7 @@ export class WalletService {
    */
   async getUserTokenAccount(mint = TOKEN_MINT) {
     if (!this.wallet?.publicKey) {
+      showToast("Wallet connection failed");
       throw new Error("Wallet not connected");
     }
 
@@ -210,28 +218,37 @@ export class WalletService {
       );
 
       // 检查代币账户是否存在
-      const tokenAccountInfo = await this.connection.getAccountInfo(userTokenAccount);
+      const tokenAccountInfo = await this.connection.getAccountInfo(
+        userTokenAccount
+      );
 
       // 如果代币账户不存在，返回地址和存在状态
       if (!tokenAccountInfo) {
-
         return {
           address: userTokenAccount,
-          exists: false
+          exists: false,
         };
       }
 
       return {
         address: userTokenAccount,
-        exists: true
+        exists: true,
       };
     } catch (error) {
       console.error("Error getting user token account:", error);
+      showFailToast({
+        message: "network error",
+        mask: true,
+      });
       // 如果是资源不可用错误，返回 null 地址
-      if (error.message?.includes('Requested resource not available')) {
+      if (error.message?.includes("Requested resource not available")) {
+        showFailToast({
+          message: "network error",
+          mask: true,
+        });
         return {
           address: null,
-          exists: false
+          exists: false,
         };
       }
       throw error;
@@ -240,4 +257,4 @@ export class WalletService {
 }
 
 // 导出单例实例
-export const walletService = new WalletService()
+export const walletService = new WalletService();
