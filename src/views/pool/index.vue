@@ -33,21 +33,22 @@
           <span class="sui">{{ pointBalance }}</span>
           <span class="content">{{ t("pool.num") }}</span>
         </div>
-        <div class="inpt_bi">
+        <!-- <div class="inpt_bi">
           <van-field
             v-model="value2"
             :placeholder="t('pool.quantity')"
             :center="true"
             type="number"
           />
-        </div>
+        </div> -->
         <img src="../../assets/img/huan.png" alt="" class="huan" />
         <div class="huo">
           <img src="../../assets/img/num.png" alt="" />
           <span>{{ t("pool.Obtain") }}</span>
         </div>
         <div class="sure" @click="solMintNft" style="cursor: pointer">
-          {{ t("home.sure") }}
+          MINT
+          <!-- {{ t("home.sure") }} -->
         </div>
       </div>
     </div>
@@ -118,13 +119,13 @@ const updateTokenBalance = async () => {
 
 // mintNft 功能
 const solMintNft = async () => {
-  if (value2.value == 0 || value2.value == "") {
-    return showToast(t("pool.quantity"));
-  }
-  if (value2.value > 10) {
-    return showToast(t("pool.mint"));
-  }
-  if (value2.value * 100 >= pointBalance.value) {
+  // if (value2.value == 0 || value2.value == "") {
+  //   return showToast(t("pool.quantity"));
+  // }
+  // if (value2.value > 10) {
+  //   return showToast(t("pool.mint"));
+  // }
+  if (pointBalance.value==0) {
     return showToast(t("Your 1024 Debris is insufficient"));
   }
 
@@ -147,9 +148,9 @@ const solMintNft = async () => {
   // const amount = new BN(100 * parseInt(value2.value));
   if (isflag.value) {
     isflag.value = false
-    for (let i = 0; i < parseInt(value2.value); i++) {
+    // for (let i = 0; i < parseInt(value2.value); i++) {
       await mintNft();
-    }
+    // }
   }else{
     console.log(33);
   }
@@ -660,7 +661,7 @@ onUnmounted(() => {
         line-height: 76px;
         text-align: center;
         background: linear-gradient(to bottom, #703dff, #813dff);
-        margin-top: 30px;
+        margin-top: 100px;
         border-radius: 48px;
       }
     }
@@ -806,7 +807,7 @@ onUnmounted(() => {
           color: white;
           line-height: 48px;
           text-align: center;
-          margin-top: 10px;
+          margin-top: 60px;
         }
       }
     }
