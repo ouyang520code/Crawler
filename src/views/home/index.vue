@@ -28,7 +28,9 @@
         <div class="my-class-name">
           <div class="address">
             <span>{{ t("home.Coordinate") }}：{{ zuobiao }}</span>
-            <span @click="linksol" style="cursor: pointer;">{{ t("home.hash") }}：{{ hanshu }}</span>
+            <span @click="linksol" style="cursor: pointer"
+              >{{ t("home.hash") }}：{{ hanshu }}</span
+            >
           </div>
         </div>
       </div>
@@ -57,7 +59,7 @@
             <span
               v-for="(item, index) in coordinate"
               :key="index"
-              style="font-size: 18px; cursor: pointer;margin-top:5px;"
+              style="font-size: 18px; cursor: pointer; margin-top: 5px"
               @click="worm(item)"
               >{{ t("home.zuobiao") }}：{{ item.x }} + {{ item.y }}</span
             >
@@ -261,12 +263,15 @@ const onCanvasClick = (event: MouseEvent) => {
         domElement.style.display = "block";
         const scrollX = window.scrollX || window.pageXOffset;
         const scrollY = window.scrollY || window.pageYOffset;
-        domElement.style.left = `${event.clientX + scrollX}px`;
-        domElement.style.top = `${event.clientY + scrollY}px`;
+        domElement.style.left = `${event.clientX - screenX + scrollX}px`;
+        domElement.style.top = `${event.clientY - screenY + scrollY}px`;
         const items = JSON.parse(localStorage.getItem("item"));
-        console.log("items>>>", items);
-        hanshu.value = items.tx.substring(0, 4) + "....." + items.tx.slice(-4);
-        zuobiao.value = items.x + "+" + items.y;
+        const result = intersect.object.name.match(/=(.*?)-/) || [];
+        const item = items.find((j) => String(j.x) === result[1]) || {};
+        if (!item.tx) return;
+        hanshu.value = item.tx.substring(0, 4) + "....." + item.tx.slice(-4);
+        zuobiao.value = item.x + "+" + item.y;
+        localStorage.setItem('coreinfo',JSON.stringify(item))
         setTimeout(() => {
           domElement.style.display = "none";
         }, 3000);
@@ -294,7 +299,7 @@ const animate = () => {
   requestAnimationFrame(animate);
   renderer.render(scene, camera);
 };
-const updateGridColor = (item: any) => {
+const updateGridColor = (item: any, items_all: any) => {
   if (threeJsContainer.value && gridGroup.children.length) {
     // 查找符合指定条件的网格修改材质
     const targetPlane = gridGroup.children.find((child) =>
@@ -303,12 +308,26 @@ const updateGridColor = (item: any) => {
     // 恢复所有格子的颜色
     originalColors.forEach((material, mesh) => {
       mesh.material = material;
-      if (mesh.name.includes("active")) {
-        mesh.name = mesh.name.split("active").join("");
+      // if (mesh.name.includes("active")||mesh.name.includes("active_all")) {
+      //   // mesh.name = mesh.name.split("active").join("");
+      //   // mesh.name = mesh.name.split("active_all").join("");
+      // }
+      mesh.name = mesh.name.replace("active", "").replace("active_all", "");
+    });
+
+    items_all.forEach((val) => {
+      const targetPlane_all = gridGroup.children.find((child) =>
+        child.name.includes(`plane=${val.x}`)
+      );
+      console.log("taera_all:", targetPlane_all, val);
+
+      if (targetPlane_all) {
+        targetPlane_all.material = new THREE.MeshBasicMaterial({
+          color: "#A9A9A9",
+        });
+        targetPlane_all.name = targetPlane_all.name + "active_all";
       }
     });
-    console.log(item, targetPlane, '**************');
-    
     if (targetPlane) {
       targetPlane.material = new THREE.MeshBasicMaterial({
         color: "#813DFF",
@@ -331,11 +350,11 @@ const updateWalletInfo = async () => {
     tokenBalance.value = await walletService.getTokenBalance(
       wallet.value.publicKey
     );
-      pointBalance.value = await walletService.getTokenBalance(
+    pointBalance.value = await walletService.getTokenBalance(
       wallet.value.publicKey,
       MINT_INFO
     );
-     balance.value = Math.floor(pointBalance.value / 100);
+    balance.value = Math.floor(pointBalance.value / 100);
     console.log("tokenBalance:", tokenBalance.value);
   } catch (error) {
     console.error("获取钱包信息失败:", error);
@@ -461,7 +480,6 @@ const buyNode = async () => {
     const tx = await provider.sendAndConfirm(
       new Transaction().add(...instructions)
     );
-
     console.log(`交易成功！交易ID: ${tx}`);
     closeToast();
     await updateWalletInfo();
@@ -546,10 +564,6 @@ const getchaxun = (tx) => {
         closeToast();
         coordinate.value = res.data;
         console.log("res>>>", res);
-
-        // is_use.value = res.data[0].is_use
-        // getProduce(is_use.value)
-        console.log("res>>>", res);
       }
     })
     .catch((err) => {
@@ -587,21 +601,32 @@ const queryaddress = (str) => {
   // getaddress();
   const numbers = str.match(/\d+/g).map(Number);
   const obj = {};
-   if (numbers.length === 2) {
+  if (numbers.length === 2) {
     obj.x = numbers[0];
     obj.y = numbers[1];
   }
-console.log("strobj>>>",obj);
-  getcore(obj)
+  console.log("strobj>>>", obj);
+  getcore(obj);
 };
 //利用坐标查询哈希数据
 const getcore = (item) => {
   $apis
     .gethax({ x: item.x, y: item.y })
-    .then((res) => {
+    .then((res: any) => {
       if (res.code == 200) {
         console.log("res哈希", res);
-        worm(res.data)
+        const item = res.data;
+        const items_all = res.all;
+        if (finish.value == false) {
+          show.value = true;
+          updateProgress(item, items_all);
+        } else {
+          finish.value = false;
+          show.value = true;
+          gressWidth.value = 0;
+          updateProgress(item, items_all);
+        }
+        // worm(res.data);
       } else {
         showToast(res.error);
         console.log("res哈希数据》》》", res);
@@ -613,19 +638,20 @@ const getcore = (item) => {
 };
 // 点击查询坐标
 const worm = (item) => {
-  if (finish.value == false) {
-    show.value = true;
-    updateProgress(item);
-  } else {
-    finish.value = false;
-    show.value = true;
-    gressWidth.value = 0;
-    updateProgress(item);
-  }
+  getcore(item);
+  // if (finish.value == false) {
+  //   show.value = true;
+  //   updateProgress(item);
+  // } else {
+  //   finish.value = false;
+  //   show.value = true;
+  //   gressWidth.value = 0;
+  //   updateProgress(item);
+  // }
 };
 // 进度条
-const updateProgress = (item) => {
-  localStorage.setItem("item", JSON.stringify(item));
+const updateProgress = (item, items_all) => {
+  localStorage.setItem("item", JSON.stringify([...items_all, item]));
   const interval = setInterval(() => {
     gressWidth.value += 1; // 更新响应式数据
     if (gressWidth.value >= 100) {
@@ -635,21 +661,21 @@ const updateProgress = (item) => {
         nextTick(() => {
           initThreeJs();
           setTimeout(() => {
-            updateGridColor(item);
+            updateGridColor(item, items_all);
           }, 1000);
         });
       } else {
-        updateGridColor(item);
+        updateGridColor(item, items_all);
       }
     }
   }, 100);
 };
 // 跳转sol浏览器
-const linksol = ()=>{
-  const coreinfo = JSON.parse(localStorage.getItem("item"));
-  const link = 'https://solscan.io/account/'+coreinfo.tx
-  window.open(link,"_blank")
-}
+const linksol = () => {
+  const coreinfo = JSON.parse(localStorage.getItem("coreinfo"));
+  const link = "https://solscan.io/account/" + coreinfo.tx;
+  window.open(link, "_blank");
+};
 // Mint Point 功能
 const solMintPoint = async () => {
   try {
@@ -756,7 +782,9 @@ const solMintPoint = async () => {
         .rpc({
           commitment: "confirmed",
         });
-      getInfo();
+      setTimeout(() => {
+        getInfo();
+      }, 2000);
       isflag.value = true;
       showToast("Received successfully");
       // .instruction();
@@ -924,12 +952,12 @@ const receivePoint = () => {
         } else {
           // showToast(res.error);
         }
+        showLoadingToast({
+          message: "Please wait and do not close the page while collecting....",
+          mask: true,
+        });
         setTimeout(() => {
-          showLoadingToast({
-            message:
-              "Please wait and do not close the page while collecting....",
-            mask: true,
-          });
+          closeToast();
           solMintPoint();
         }, 6000);
       })
