@@ -9,7 +9,7 @@
             <span>Reptile</span>
           </div>
           <span
-            :class="index == flag ? 'pc_home' : 'txt'"
+            :class="index === flag ? 'pc_home' : 'txt'"
             v-for="(item, index) in home"
             @click="select2(index, item)"
             >{{ item.title }}</span
@@ -93,7 +93,7 @@
 </template>
 <script setup>
 import { ref, onMounted,computed } from "vue";
-import { useRouter } from "vue-router";
+import { useRouter,useRoute } from "vue-router";
 import { Connection, clusterApiUrl } from "@solana/web3.js";
 import { useI18n } from "vue-i18n";
 
@@ -114,10 +114,15 @@ const home =  computed(()=>[
   },
 ]);
 const show = ref(false);
-const flag = ref(0);
+// const flag = ref(0);
 const router = useRouter();
 const { locale } = useI18n();
 const isloca = ref(false)
+const route = useRoute();
+
+const flag = computed(() => {
+  return home.value.findIndex((item) => item.name === route.name);
+});
 
 const changeloca=()=>{
   isloca.value = !isloca.value
