@@ -237,13 +237,13 @@ export class WalletService {
     } catch (error) {
       console.error("Error getting user token account:", error);
       showFailToast({
-        message: "network error",
+        message: "JSON-RPC endpoint request timeout",
         mask: true,
       });
       // 如果是资源不可用错误，返回 null 地址
       if (error.message?.includes("Requested resource not available")) {
         showFailToast({
-          message: "network error",
+          message: "JSON-RPC endpoint request timeout",
           mask: true,
         });
         return {

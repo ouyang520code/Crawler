@@ -481,7 +481,9 @@ const buyNode = async () => {
       new Transaction().add(...instructions)
     );
     console.log(`交易成功！交易ID: ${tx}`);
+    if(tx){
     closeToast();
+    }
     await updateWalletInfo();
     $apis
       .queryTx({ txId: tx })
