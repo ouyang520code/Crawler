@@ -1329,7 +1329,7 @@ const receivePoint = () => {
 
     .product {
       width: 95%;
-      height: 1000px;
+      height: 1100px;
       display: flex;
       flex-direction: column;
       margin: -28% auto;
@@ -1399,7 +1399,7 @@ const receivePoint = () => {
         }
 
         img {
-          width: 389px;
+          width: 374px;
           height: 389px;
           margin-top: 5%;
         }
@@ -1411,8 +1411,6 @@ const receivePoint = () => {
         height: auto;
         padding: 3% 4%;
         margin-top: 5%;
-        box-sizing: border-box;
-
         span {
           font-size: 16px;
         }
@@ -1420,7 +1418,6 @@ const receivePoint = () => {
         .daibi {
           width: 100%;
           height: 70px;
-
           .mint {
             font-size: 14px;
           }
@@ -1428,8 +1425,10 @@ const receivePoint = () => {
 
         .ruzhu {
           width: 100%;
-          height: 244px;
+          min-height: 244px;
+          height: auto;
           padding: 2% 4%;
+          box-sizing: border-box;
 
           text {
             font-size: 16px;
