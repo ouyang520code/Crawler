@@ -1400,9 +1400,11 @@ const receivePoint = () => {
 
       .pro_right {
         width: 100%;
-        height: 580px;
+        min-height: 580px;
+        height: auto;
         padding: 3% 4%;
         margin-top: 5%;
+        box-sizing: border-box;
 
         span {
           font-size: 16px;
