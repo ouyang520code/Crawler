@@ -28,8 +28,8 @@
             <span>{{ t("home.zuobiao") }}</span>
           </div>
           <div class="box_list">
-            <div class="list" v-for="(items, inde) in item" :key="index">
-              <span>{{ items.hash }}</span>
+            <div class="list" v-for="(items, index) in item" :key="index">
+              <span @click="linkhash(items)" style="cursor: pointer;">{{ items.hash }}</span>
               <span>{{ items.x }} + {{ items.y }}</span>
             </div>
           </div>
@@ -45,7 +45,7 @@
           <span>{{ t("home.zuobiao") }}</span>
         </div>
         <div class="liushui" v-for="(item, index) in list" :key="index">
-          <span>{{ item.hash }}</span>
+          <span @click="linkhash(item)">{{ item.hash }}</span>
           <span>{{ item.x }} + {{ item.y }}</span>
         </div>
       </div>
@@ -81,6 +81,12 @@ const count = <any>ref("");
 const pointBalance = ref(0);
 const createNftNum = ref(0);
 
+
+// 跳转超链接
+const linkhash = (item)=>{
+  const link = "https://solscan.io/account/" + item.tx;
+  window.open(link, "_blank");
+}
 const add = () => {
   if (currentPage.value >= count.value) return showToast("已经是最后一页");
   if (list.value.length == 0) return showToast("暂无更多数据~");

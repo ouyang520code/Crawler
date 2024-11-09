@@ -162,28 +162,28 @@ const connected = ref(false);
 const connectWallet = async () => {
   try {
     // 1. 检查是否是移动设备
-    const isMobile =/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    // const isMobile =/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     if (!window.solana || !window.solana.isPhantom) {
       window.open("https://phantom.app/", "_blank");
       return;
     }
-    if (isMobile) {
-      // 2. 生成当前页面的 URL
-      const currentURL = window.location.href; // 3. 提供选项让用户在钱包中打开
-      const openInWallet = confirm("Please open this page in the wallet app, click OK to copy the link or directly open the wallet");
-      if (openInWallet) {
-        // 复制链接进入钱包打开
-        // navigator.clipboard
-        //   .writeText(currentURL)
-        //   .then(() => alert("链接已复制，请在钱包 App 中粘贴打开"))
-        //   .catch(() => alert("复制失败，请手动复制链接"));
+    // if (isMobile) {
+    //   // 2. 生成当前页面的 URL
+    //   const currentURL = window.location.href; // 3. 提供选项让用户在钱包中打开
+    //   const openInWallet = confirm("Please open this page in the wallet app, click OK to copy the link or directly open the wallet");
+    //   if (openInWallet) {
+    //     // 复制链接进入钱包打开
+    //     // navigator.clipboard
+    //     //   .writeText(currentURL)
+    //     //   .then(() => alert("链接已复制，请在钱包 App 中粘贴打开"))
+    //     //   .catch(() => alert("复制失败，请手动复制链接"));
 
-        // 方式2：尝试直接打开钱包
-        // Phantom
-        window.location.href = `phantom://browse/${encodeURIComponent(currentURL)}`;
-      }
-      return false;
-    }
+    //     // 方式2：尝试直接打开钱包
+    //     // Phantom
+    //     window.location.href = `phantom://browse/${encodeURIComponent(currentURL)}`;
+    //   }
+    //   return false;
+    // }
     const response = await window.solana.connect();
     console.log("Connected with Public Key:", response.publicKey);
     connected.value = true;
