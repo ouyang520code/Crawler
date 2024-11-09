@@ -50,6 +50,7 @@ export const EDITION_MARKERPDA=new PublicKey(
 
 export const MASTER_TOKEN_ACCOUNT = new PublicKey("73kkRjE1L8nmU7Aq35jyydK5WXsjS6tZRRn84Agaiea6");
 
+export const NFT_CREATE = new PublicKey("CBqCkV1N4u8yGZw5jsNvoWhb8eBUT6Cabj22yDiSY4Up");
 // 代币精度
 export const TOKEN_DECIMALS = 8;
 export const MIN_AMOUNT = 1024;
