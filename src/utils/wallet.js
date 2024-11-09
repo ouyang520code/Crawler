@@ -63,7 +63,7 @@ export class WalletService {
         try {
             const wallet = this.getPhantomWallet();
             if (!wallet) {
-                throw new Error("请安装 Phantom 钱包");
+                throw new Error("Please install Phantom Wallet");
             }
             await wallet.connect();
             this.wallet = wallet;

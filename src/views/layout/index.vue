@@ -18,12 +18,16 @@
         <div class="pc_left">
           <div class="pc_lang" @click="changeloca">
             <img src="../../assets/img/loca.png" alt="" class="jia" />
-            <span>{{t("navbar.loca")}}</span>
+            <span>{{ t("navbar.loca") }}</span>
             <img src="../../assets/img/xia.png" alt="" class="xia" />
           </div>
           <div class="qian">
-            <button @click="connectWallet" v-if="!connected">{{t("navbar.link")}}</button>
-            <button @click="disconnectWallet" v-else>{{t("navbar.discount")}}</button>
+            <button @click="connectWallet" v-if="!connected">
+              {{ t("navbar.link") }}
+            </button>
+            <button @click="disconnectWallet" v-else>
+              {{ t("navbar.discount") }}
+            </button>
           </div>
         </div>
       </div>
@@ -47,8 +51,12 @@
         </div>
         <div class="content">{{ names }}</div>
         <div class="nav_left">
-          <button @click="connectWallet" v-if="!connected">{{t("navbar.link")}}</button>
-          <button @click="disconnectWallet" v-else>{{t("navbar.discount")}}</button>
+          <button @click="connectWallet" v-if="!connected">
+            {{ t("navbar.link") }}
+          </button>
+          <button @click="disconnectWallet" v-else>
+            {{ t("navbar.discount") }}
+          </button>
         </div>
       </div>
       <div class="pop_nav" v-if="show">
@@ -92,14 +100,14 @@
   </div>
 </template>
 <script setup>
-import { ref, onMounted,computed } from "vue";
-import { useRouter,useRoute } from "vue-router";
+import { ref, onMounted, computed } from "vue";
+import { useRouter, useRoute } from "vue-router";
 import { Connection, clusterApiUrl } from "@solana/web3.js";
 import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
 const names = ref(t("navbar.information"));
-const home =  computed(()=>[
+const home = computed(() => [
   {
     name: "home",
     title: t("navbar.home"),
@@ -117,17 +125,17 @@ const show = ref(false);
 // const flag = ref(0);
 const router = useRouter();
 const { locale } = useI18n();
-const isloca = ref(false)
+const isloca = ref(false);
 const route = useRoute();
 
 const flag = computed(() => {
   return home.value.findIndex((item) => item.name === route.name);
 });
 
-const changeloca=()=>{
-  isloca.value = !isloca.value
-locale.value = isloca.value==true?"zh":'en';
-}
+const changeloca = () => {
+  isloca.value = !isloca.value;
+  locale.value = isloca.value == true ? "zh" : "en";
+};
 
 const showpu = () => {
   show.value = !show.value;
@@ -153,9 +161,28 @@ const connected = ref(false);
 
 const connectWallet = async () => {
   try {
+    // 1. 检查是否是移动设备
+    const isMobile =/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     if (!window.solana || !window.solana.isPhantom) {
       window.open("https://phantom.app/", "_blank");
       return;
+    }
+    if (isMobile) {
+      // 2. 生成当前页面的 URL
+      const currentURL = window.location.href; // 3. 提供选项让用户在钱包中打开
+      const openInWallet = confirm("Please open this page in the wallet app, click OK to copy the link or directly open the wallet");
+      if (openInWallet) {
+        // 复制链接进入钱包打开
+        // navigator.clipboard
+        //   .writeText(currentURL)
+        //   .then(() => alert("链接已复制，请在钱包 App 中粘贴打开"))
+        //   .catch(() => alert("复制失败，请手动复制链接"));
+
+        // 方式2：尝试直接打开钱包
+        // Phantom
+        window.location.href = `phantom://browse/${encodeURIComponent(currentURL)}`;
+      }
+      return false;
     }
     const response = await window.solana.connect();
     console.log("Connected with Public Key:", response.publicKey);
