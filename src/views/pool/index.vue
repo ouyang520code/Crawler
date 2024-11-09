@@ -14,9 +14,9 @@
     <div class="info">
       <span>{{ t("home.address") }}：{{ walletAddress }}</span>
       <div>
-        NFT：{{ balance
+        NFT：{{ createNftNum
         }}<span style="margin-left: 10px">{{
-          balance > 0 ? t("home.production") : t("home.ispro")
+          createNftNum > 0 ? t("home.production") : t("home.ispro")
         }}</span>
       </div>
     </div>
@@ -102,6 +102,7 @@ const connected = ref(false);
 const vseison = ref("");
 const pointBalance = ref(0);
 const isflag = ref(true);
+const createNftNum = ref(0);
 
 // 获取代币余额
 const updateTokenBalance = async () => {
@@ -345,6 +346,7 @@ const mintNft = async () => {
          balance.value = Math.floor(pointBalance.value / 100);
       }
       getInfo();
+      createNftNum.value = await walletService.fetchAllNft();
     } catch (error) {
       isflag.value = true
       console.error("Transaction failed:", error.message); // 输出错误信息
@@ -385,6 +387,8 @@ const updateWalletInfo = async () => {
     if (walletAddress.value.length > 0) {
       // getaddress();
       getInfo();
+      createNftNum.value = await walletService.fetchAllNft();
+
     }
     tokenBalance.value = await walletService.getTokenBalance(
       wallet.value.publicKey

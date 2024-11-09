@@ -13,9 +13,9 @@
     <div class="info">
       <span>{{ t("home.address") }}：{{ walletAddress }}</span>
       <div>
-        NFT：{{ balance
+        NFT：{{ createNftNum
         }}<span style="margin-left: 10px">{{
-          balance > 0 ? t("home.production") : t("home.ispro")
+          createNftNum > 0 ? t("home.production") : t("home.ispro")
         }}</span>
       </div>
     </div>
@@ -79,6 +79,7 @@ const connected = ref(false);
 const rows = ref([]);
 const count = <any>ref("");
 const pointBalance = ref(0);
+const createNftNum = ref(0);
 
 const add = () => {
   if (currentPage.value >= count.value) return showToast("已经是最后一页");
@@ -143,6 +144,8 @@ const updateWalletInfo = async () => {
     if (walletAddress.value.length > 0) {
       getaddress();
       getInfo();
+      createNftNum.value = await walletService.fetchAllNft();
+
     }
     tokenBalance.value = await walletService.getTokenBalance(
       wallet.value.publicKey
@@ -181,6 +184,7 @@ onMounted(async () => {
       await new Promise((resolve) => setTimeout(resolve, 500));
     }
     await walletService.connectWallet();
+
     // await updateTokenBalance();
   } catch (error) {
     console.error("Wallet initialization error:", error);
@@ -192,6 +196,7 @@ onMounted(async () => {
       wallet.value = connectedWallet;
       connected.value = true;
       await updateWalletInfo();
+
     },
     onDisconnect: () => {
       console.log("钱包已断开连接");
