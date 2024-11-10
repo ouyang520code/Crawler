@@ -1,20 +1,21 @@
 <template>
   <div class="pool">
-    <div class="biaoti">{{t("pool.information")}}</div>
+    <div class="biaoti">{{ t("pool.information") }}</div>
     <div class="inpt">
       <van-field
-        v-model="value1"
-        label=""
-        left-icon="search"
-        :placeholder="t('home.input')"
-        :center="true"
+          v-model="value1"
+          label=""
+          left-icon="search"
+          :placeholder="t('home.input')"
+          :center="true"
       />
       <div class="btn" style="cursor: pointer">{{ t("home.sure") }}</div>
     </div>
     <div class="info">
       <span>{{ t("home.address") }}：{{ walletAddress }}</span>
       <div>
-        NFT：{{ createNftNum
+        NFT：{{
+          createNftNum
         }}<span style="margin-left: 10px">{{
           createNftNum > 0 ? t("home.production") : t("home.ispro")
         }}</span>
@@ -23,12 +24,12 @@
     <div class="synthesis">
       <div class="left">
         <div class="left_btn">
-          <img src="../../assets/img/zhuan.png" alt="" />
+          <img src="../../assets/img/zhuan.png" alt=""/>
           <span>{{ pointBalance }}</span>
         </div>
       </div>
       <div class="right">
-        <img src="../../assets/img/zhuan1.png" alt="" />
+        <img src="../../assets/img/zhuan1.png" alt=""/>
         <div class="num">
           <span class="sui">{{ pointBalance }}</span>
           <span class="content">{{ t("pool.num") }}</span>
@@ -41,30 +42,30 @@
             type="number"
           />
         </div> -->
-        <img src="../../assets/img/huan.png" alt="" class="huan" />
+        <img src="../../assets/img/huan.png" alt="" class="huan"/>
         <div class="huo">
-          <img src="../../assets/img/num.png" alt="" />
+          <img src="../../assets/img/num.png" alt=""/>
           <span>{{ t("pool.Obtain") }}</span>
         </div>
         <div class="sure" @click="solMintNft" style="cursor: pointer">
           MINT
         </div>
-        <div class="zushi">{{t("pool.zushi")}}</div>
+        <div class="zushi">{{ t("pool.zushi") }}</div>
       </div>
     </div>
   </div>
 </template>
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from "vue";
-import { Program } from "@project-serum/anchor";
-import { PublicKey, SystemProgram } from "@solana/web3.js";
+import {onMounted, onUnmounted, ref} from "vue";
+import {Program} from "@project-serum/anchor";
+import {PublicKey, SystemProgram} from "@solana/web3.js";
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   getAssociatedTokenAddress,
   getOrCreateAssociatedTokenAccount,
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
-import { walletService } from "@/utils/wallet";
+import {walletService} from "@/utils/wallet";
 import {
   DATA_SEED,
   EDITION_MARKERPDA,
@@ -76,9 +77,11 @@ import {
   PROGRAM_ID,
   SYSVAR_INSTRUCTIONS,
   TOKEN_METADATA_PROGRAM_ID,
+  MASTER_METADATA_MINT_ID,
+  EDITION_MARKER_BIT_SIZE
 } from "@/utils/constants";
 import BN from "bn.js";
-import { IDL } from "@/idl/idl";
+import {IDL} from "@/idl/idl";
 import {
   closeToast,
   showLoadingToast,
@@ -86,9 +89,9 @@ import {
   showToast,
 } from "vant";
 import $apis from "@/networks/apis";
-import { useI18n } from "vue-i18n";
+import {useI18n} from "vue-i18n";
 
-const { t } = useI18n();
+const {t} = useI18n();
 const value1 = ref("");
 const value2 = <any>ref("");
 const loading = ref(false);
@@ -109,8 +112,8 @@ const updateTokenBalance = async () => {
   try {
     if (!walletService.wallet?.publicKey) return;
     tokenBalance.value = await walletService.getTokenBalance(
-      walletService.wallet.publicKey,
-      MASTER_EDITION_INFO
+        walletService.wallet.publicKey,
+        MASTER_EDITION_INFO
     );
   } catch (error) {
     console.error("Error updating token balance:", error);
@@ -126,7 +129,7 @@ const solMintNft = async () => {
   // if (value2.value > 10) {
   //   return showToast(t("pool.mint"));
   // }
-  if (pointBalance.value==0) {
+  if (pointBalance.value == 0) {
     return showToast(t("Your 1024 Debris is insufficient"));
   }
 
@@ -136,23 +139,23 @@ const solMintNft = async () => {
   }
   const program = new Program(IDL, PROGRAM_ID, provider);
   const [adminPad] = PublicKey.findProgramAddressSync(
-    [Buffer.from("adminGlobal")],
-    program.programId
+      [Buffer.from("adminGlobal")],
+      program.programId
   );
 
   const accountData = await program.account.admin.fetch(adminPad);
   console.log("PDA Account Data:", JSON.stringify(accountData, null, 2));
   vseison.value = parseInt(
-    JSON.parse(JSON.stringify(accountData, null, 2)).editionNumber,
-    16
+      JSON.parse(JSON.stringify(accountData, null, 2)).editionNumber,
+      16
   ).toString();
   // const amount = new BN(100 * parseInt(value2.value));
   if (isflag.value) {
     isflag.value = false
     // for (let i = 0; i < parseInt(value2.value); i++) {
-      await mintNft();
+    await mintNft();
     // }
-  }else{
+  } else {
     console.log(33);
   }
 };
@@ -180,23 +183,23 @@ const mintNft = async () => {
 
     // Get token account using the connected wallet
     const userTokenAccountBurn = await getOrCreateAssociatedTokenAccount(
-      walletService.getConnection(),
-      walletService.wallet.payer, // payer
-      new PublicKey(MINT_INFO), // mint
-      provider.wallet.publicKey // 用户的公钥
+        walletService.getConnection(),
+        walletService.wallet.payer, // payer
+        new PublicKey(MINT_INFO), // mint
+        provider.wallet.publicKey // 用户的公钥
     );
     const program = new Program(IDL, PROGRAM_ID, provider);
 
     // 获取 PDA 账户
     const [pdaAccount] = PublicKey.findProgramAddressSync(
-      [Buffer.from(DATA_SEED), provider.wallet.publicKey.toBuffer()],
-      program.programId
+        [Buffer.from(DATA_SEED), provider.wallet.publicKey.toBuffer()],
+        program.programId
     );
 
     // 获取 adminPDA 账户
     const [adminPad] = PublicKey.findProgramAddressSync(
-      [Buffer.from("adminGlobal")],
-      program.programId
+        [Buffer.from("adminGlobal")],
+        program.programId
     );
     console.log("adminPDA", adminPad.toString());
 
@@ -205,10 +208,10 @@ const mintNft = async () => {
       const accountData = await program.account.admin.fetch(adminPad);
       console.log("PDA Account Data:", JSON.stringify(accountData, null, 2));
       let vseisonTemp = (
-        parseInt(
-          JSON.parse(JSON.stringify(accountData, null, 2)).editionNumber,
-          16
-        ) + 1
+          parseInt(
+              JSON.parse(JSON.stringify(accountData, null, 2)).editionNumber,
+              16
+          ) + 1
       ).toString();
       if (vseison.value < vseisonTemp) {
         vseison.value = vseisonTemp;
@@ -225,33 +228,44 @@ const mintNft = async () => {
 
     editionNumberBuffer.writeBigUInt64LE(editionNumber, 0);
     const [mintInfo] = PublicKey.findProgramAddressSync(
-      [
-        Buffer.from("MINTTOKEN"),
-        program.programId.toBuffer(),
-        provider.wallet.publicKey.toBuffer(),
-        editionNumberBuffer,
-      ],
-      program.programId
+        [
+          Buffer.from("MINTTOKEN"),
+          program.programId.toBuffer(),
+          provider.wallet.publicKey.toBuffer(),
+          editionNumberBuffer,
+        ],
+        program.programId
     );
     const userTokenAccount = await getAssociatedTokenAddress(
-      mintInfo,
-      provider.wallet.publicKey,
-      true,
-      TOKEN_PROGRAM_ID,
-      ASSOCIATED_TOKEN_PROGRAM_ID
+        mintInfo,
+        provider.wallet.publicKey,
+        true,
+        TOKEN_PROGRAM_ID,
+        ASSOCIATED_TOKEN_PROGRAM_ID
     );
 
     // 获取 Point PDA
     const [pointPDA] = PublicKey.findProgramAddressSync(
-      [Buffer.from(POINT_SEED)],
-      program.programId
+        [Buffer.from(POINT_SEED)],
+        program.programId
     );
-    // 生成 editionMarkerpda PDA
-    const editionMarkerpda = EDITION_MARKERPDA;
+
+    // 计算PDA的函数
+    const editionNumberFloor = Math.floor(parseInt(vseison.value) / EDITION_MARKER_BIT_SIZE);
+    console.log(editionNumberFloor);
+    const seeds = [
+      Buffer.from("metadata"),
+      TOKEN_METADATA_PROGRAM_ID.toBuffer(),
+      MASTER_METADATA_MINT_ID.toBuffer(),
+      Buffer.from("edition"),
+      Buffer.from(editionNumberFloor.toString()), // 将edition_number转换为Buffer
+    ];
+    const editionMarkerpda = PublicKey.findProgramAddressSync(seeds, TOKEN_METADATA_PROGRAM_ID)[0];
+
     // 检查 PDA 账户是否存在
     const accountInfo = await walletService
-      .getConnection()
-      .getAccountInfo(pdaAccount);
+        .getConnection()
+        .getAccountInfo(pdaAccount);
 
     // 构建交易指令
     const instructions = [];
@@ -259,73 +273,73 @@ const mintNft = async () => {
     // 如果 PDA 账户不存在，添加初始化指令
     if (!accountInfo) {
       instructions.push(
-        await program.methods
-          .initUserData()
-          .accounts({
-            user: provider.wallet.publicKey,
-            pdaAccount: pdaAccount,
-            systemProgram: SystemProgram.programId,
-          })
-          .instruction()
+          await program.methods
+              .initUserData()
+              .accounts({
+                user: provider.wallet.publicKey,
+                pdaAccount: pdaAccount,
+                systemProgram: SystemProgram.programId,
+              })
+              .instruction()
       );
     }
 
     try {
       // 生成 Metadata PDA
       const [editionMetadata] = PublicKey.findProgramAddressSync(
-        [
-          Buffer.from("metadata"),
-          TOKEN_METADATA_PROGRAM_ID.toBuffer(),
-          mintInfo.toBuffer(),
-        ],
-        TOKEN_METADATA_PROGRAM_ID
+          [
+            Buffer.from("metadata"),
+            TOKEN_METADATA_PROGRAM_ID.toBuffer(),
+            mintInfo.toBuffer(),
+          ],
+          TOKEN_METADATA_PROGRAM_ID
       );
       // 生成 Edition PDA
       const [edition] = PublicKey.findProgramAddressSync(
-        [
-          Buffer.from("metadata"),
-          TOKEN_METADATA_PROGRAM_ID.toBuffer(),
-          mintInfo.toBuffer(),
-          Buffer.from("edition"),
-        ],
-        TOKEN_METADATA_PROGRAM_ID
+          [
+            Buffer.from("metadata"),
+            TOKEN_METADATA_PROGRAM_ID.toBuffer(),
+            mintInfo.toBuffer(),
+            Buffer.from("edition"),
+          ],
+          TOKEN_METADATA_PROGRAM_ID
       );
 
       const [PDA, authority_bump] = PublicKey.findProgramAddressSync(
-        [Buffer.from("NFT"), program.programId.toBuffer()],
-        program.programId
+          [Buffer.from("NFT"), program.programId.toBuffer()],
+          program.programId
       );
 
       // 添加 mintNft 指令
       const tx = await program.methods
-        .mintNft(new BN(vseison.value), new BN(100))
-        .accounts({
-          pdaAccount: pdaAccount,
-          metaplexTokenMetadata: TOKEN_METADATA_PROGRAM_ID,
-          editionMetadata: editionMetadata,
-          edition: edition,
-          editionMint: mintInfo,
-          editionTokenAccountOwner: provider.wallet.publicKey,
-          editionTokenAccount: userTokenAccount,
-          editionMintAuthority: PDA,
-          masterEdition: MASTER_EDITION_INFO,
-          editionMarkerPda: editionMarkerpda,
-          payer: provider.wallet.publicKey,
-          masterTokenAccountOwner: PDA,
-          masterTokenAccount: MASTER_TOKEN_ACCOUNT,
-          masterMetadata: MASTER_METADATA,
-          updateAuthority: PDA,
-          splTokenProgram: TOKEN_PROGRAM_ID,
-          splAtaProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-          sysvarInstructions: SYSVAR_INSTRUCTIONS,
-          systemProgram: SystemProgram.programId,
-          tokenMint: MINT_INFO,
-          // userTokenAccount: tokenAccount.address,
-          userTokenAccount: userTokenAccountBurn.address,
-          adminData: adminPad,
-        })
-        .rpc();
-        isflag.value = true
+          .mintNft(new BN(vseison.value), new BN(100))
+          .accounts({
+            pdaAccount: pdaAccount,
+            metaplexTokenMetadata: TOKEN_METADATA_PROGRAM_ID,
+            editionMetadata: editionMetadata,
+            edition: edition,
+            editionMint: mintInfo,
+            editionTokenAccountOwner: provider.wallet.publicKey,
+            editionTokenAccount: userTokenAccount,
+            editionMintAuthority: PDA,
+            masterEdition: MASTER_EDITION_INFO,
+            editionMarkerPda: editionMarkerpda,
+            payer: provider.wallet.publicKey,
+            masterTokenAccountOwner: PDA,
+            masterTokenAccount: MASTER_TOKEN_ACCOUNT,
+            masterMetadata: MASTER_METADATA,
+            updateAuthority: PDA,
+            splTokenProgram: TOKEN_PROGRAM_ID,
+            splAtaProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+            sysvarInstructions: SYSVAR_INSTRUCTIONS,
+            systemProgram: SystemProgram.programId,
+            tokenMint: MINT_INFO,
+            // userTokenAccount: tokenAccount.address,
+            userTokenAccount: userTokenAccountBurn.address,
+            adminData: adminPad,
+          })
+          .rpc();
+      isflag.value = true
       // 创建交易
       // const transaction = new Transaction();
       // transaction.add(tx);
@@ -343,7 +357,7 @@ const mintNft = async () => {
       showSuccessToast("Mint NFT success！");
       if (tx) {
         pointBalance.value -= 100;
-         balance.value = Math.floor(pointBalance.value / 100);
+        balance.value = Math.floor(pointBalance.value / 100);
       }
       getInfo();
       createNftNum.value = await walletService.fetchAllNft();
@@ -391,13 +405,13 @@ const updateWalletInfo = async () => {
 
     }
     tokenBalance.value = await walletService.getTokenBalance(
-      wallet.value.publicKey
+        wallet.value.publicKey
     );
     pointBalance.value = await walletService.getTokenBalance(
-      wallet.value.publicKey,
-      MINT_INFO
+        wallet.value.publicKey,
+        MINT_INFO
     );
-     balance.value = Math.floor(pointBalance.value / 100);
+    balance.value = Math.floor(pointBalance.value / 100);
   } catch (error) {
     console.error("获取钱包信息失败:", error);
   }
@@ -405,16 +419,16 @@ const updateWalletInfo = async () => {
 //查询用户信息
 const getInfo = () => {
   $apis
-    .getUserinfo({ address: walletAddress.value })
-    .then((res) => {
-      if (res.code == 200) {
-        console.log("res>>>用户信息", res);
-      //  balance.value = parseInt((res.data.node_success * 1024) / 100);
-      }
-    })
-    .catch((err) => {
-      console.log("err>>>用户信息", err);
-    });
+      .getUserinfo({address: walletAddress.value})
+      .then((res) => {
+        if (res.code == 200) {
+          console.log("res>>>用户信息", res);
+          //  balance.value = parseInt((res.data.node_success * 1024) / 100);
+        }
+      })
+      .catch((err) => {
+        console.log("err>>>用户信息", err);
+      });
 };
 
 // 组件挂载时初始化钱包连接
@@ -668,12 +682,13 @@ onUnmounted(() => {
         margin-top: 60px;
         border-radius: 48px;
       }
-      .zushi{
+
+      .zushi {
         width: 92%;
         color: #ffffff;
         font-size: 24px;
         margin-top: 30px;
-         word-wrap: break-word;
+        word-wrap: break-word;
         word-break: break-all;
       }
     }
@@ -821,14 +836,15 @@ onUnmounted(() => {
           text-align: center;
           margin-top: 20px;
         }
-        .zushi{
-        width: 92%;
-        color: #ffffff;
-        font-size: 18px;
-        margin-top: 15px;
-         word-wrap: break-word;
-        word-break: break-all;
-      }
+
+        .zushi {
+          width: 92%;
+          color: #ffffff;
+          font-size: 18px;
+          margin-top: 15px;
+          word-wrap: break-word;
+          word-break: break-all;
+        }
       }
     }
   }

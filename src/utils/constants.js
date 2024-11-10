@@ -40,6 +40,12 @@ export const MASTER_METADATA = new PublicKey(
   "BVMbuAkQYMYpbygCS8gZZ3s75QkymAe1cuAjNUWKeTQc"
 );
 
+export const  MASTER_METADATA_MINT_ID = new PublicKey(
+  "45yrt1CeMQGxAhtdEYhgaAwWVzrxEs85regvdFbdsHtp"
+);
+
+export const EDITION_MARKER_BIT_SIZE = 248;
+
 export const SYSVAR_INSTRUCTIONS = new PublicKey(
   "Sysvar1nstructions1111111111111111111111111"
 );
