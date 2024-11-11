@@ -13,7 +13,7 @@ const en: LocaleTokens = {
   home: {
     address: "address",
     sure:"sure",
-    input:"Please enter....",
+    input:"Please enter coordinates and connect them with a+sign (x+y)....",
     production:"Already generated",
     ispro:"Not generated",
     gongzuo:"Crawler work",

@@ -83,6 +83,7 @@
             <img src="../../assets/img/foin.png" alt="" />
             <img src="../../assets/img//xiang.png" alt="" />
             <img src="../../assets/img/feiji.png" alt="" />
+            <img src="../../assets/img/tx.png" alt="" />
           </div>
         </div>
         <div class="footer_left">

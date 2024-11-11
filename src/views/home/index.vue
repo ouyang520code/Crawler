@@ -789,9 +789,9 @@ const solMintPoint = async () => {
           .rpc({
             commitment: "confirmed",
           });
-      setTimeout(() => {
+      // setTimeout(() => {
         getInfo();
-      }, 2000);
+      // }, 2000);
       isflag.value = true;
       showToast("Received successfully");
       // .instruction();

@@ -13,7 +13,7 @@ const zh: LocaleTokens = {
   home: {
     address:"地址",
     sure:"确认",
-    input:"请输入.....",
+    input:"请输入坐标，以+号连接（x+y）.....",
     production:"已产生",
     ispro:"未产生",
     gongzuo:"爬虫工作",
