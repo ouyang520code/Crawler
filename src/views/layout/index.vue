@@ -79,10 +79,10 @@
           </div>
           <text>https://reptile1024.com/</text>
           <div class="footer_box">
-            <img src="../../assets/img/tx.png" alt="" />
-            <img src="../../assets/img/foin.png" alt="" />
-            <img src="../../assets/img//xiang.png" alt="" />
-            <img src="../../assets/img/feiji.png" alt="" />
+            <img src="../../assets/img/tx.png" alt="" @click="jump('https://x.com/reptile1024')"/>
+            <!-- <img src="../../assets/img/foin.png" alt="" />
+            <img src="../../assets/img//xiang.png" alt="" /> -->
+            <img src="../../assets/img/feiji.png" alt="" @click="jump('https://t.me/reptile1024')"/>
           </div>
         </div>
         <div class="footer_left">
@@ -132,6 +132,9 @@ const flag = computed(() => {
   return home.value.findIndex((item) => item.name === route.name);
 });
 
+const jump = (url)=>{
+  window.open(url)
+}
 const changeloca = () => {
   isloca.value = !isloca.value;
   locale.value = isloca.value == true ? "zh" : "en";
@@ -364,11 +367,14 @@ onMounted(() => {
         .footer_box {
           margin-top: 20px;
           display: flex;
-          justify-content: space-between;
+          // justify-content: space-between;
+          justify-content: flex-start;
           align-items: center;
           img {
             width: 40px;
             height: 37px;
+            margin-left: 8%;
+            cursor: pointer;
           }
         }
       }
