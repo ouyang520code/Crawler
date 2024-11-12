@@ -63,7 +63,7 @@ export const MASTER_TOKEN_ACCOUNT = new PublicKey("GEBntfuRwS17tM9kK3HdRH5H8bbhG
 
 export const NFT_CREATE = new PublicKey("Hrm1SEAf9GQUL5svdDRcTKWQpuAna7PNoWMSWiDcVECx");//ok
 // 代币精度
-export const TOKEN_DECIMALS = 9;
+export const TOKEN_DECIMALS = 6;
 export const MIN_AMOUNT = 1;//ok
 
 // 其他配置常量
