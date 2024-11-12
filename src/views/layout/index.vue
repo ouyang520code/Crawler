@@ -79,11 +79,10 @@
           </div>
           <text>https://www.iconfont.cn/search/inde</text>
           <div class="footer_box">
-            <img src="../../assets/img/poto.png" alt="" />
+            <img src="../../assets/img/tx.png" alt="" />
             <img src="../../assets/img/foin.png" alt="" />
             <img src="../../assets/img//xiang.png" alt="" />
             <img src="../../assets/img/feiji.png" alt="" />
-            <img src="../../assets/img/tx.png" alt="" />
           </div>
         </div>
         <div class="footer_left">
