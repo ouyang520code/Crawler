@@ -50,7 +50,7 @@ export class WalletService {
         console.log(allNFTs)
         for (const allNFTsKey in allNFTs) {
             if (allNFTs[allNFTsKey].creators[0].address.toBase58() == NFT_CREATE.toBase58()
-                && allNFTs[allNFTsKey].name == "1024") {
+                && allNFTs[allNFTsKey].name == "Reptile1024") {
 
                 num += 1;
             }
