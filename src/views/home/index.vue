@@ -513,6 +513,12 @@ const buyNode = async () => {
     if (!walletService.isUserRejection(error)) {
       console.log(`错误: ${error.message}`);
     }
+    if (error.name === 'SendTransactionError') {
+      // 调用 getLogs() 获取详细信息
+      const logs = await error.getLogs();
+      console.error('发送交易错误:', error.message);
+      console.error('详细日志:', logs);
+    }
   } finally {
     loading.value = false;
     status.value = "";
@@ -790,7 +796,7 @@ const solMintPoint = async () => {
             commitment: "confirmed",
           });
       // setTimeout(() => {
-        getInfo();
+      getInfo();
       // }, 2000);
       isflag.value = true;
       showToast("Received successfully");
@@ -1054,6 +1060,7 @@ const receivePoint = () => {
       color: #ffffff;
       font-size: 18px;
       margin-top: 2%;
+
       span {
         color: #813dff;
       }
@@ -1316,19 +1323,22 @@ const receivePoint = () => {
       box-sizing: border-box;
       border-radius: 5px;
       margin: 34% auto;
-      div{
+
+      div {
         word-wrap: break-word;
         word-break: break-all;
         font-size: 12px;
       }
+
       .nft_span {
-      color: #ffffff;
-      font-size: 12px;
-      margin-top: 1%;
-      span {
-        color: #813dff;
+        color: #ffffff;
+        font-size: 12px;
+        margin-top: 1%;
+
+        span {
+          color: #813dff;
+        }
       }
-    }
     }
 
     .product {
@@ -1415,6 +1425,7 @@ const receivePoint = () => {
         height: auto;
         padding: 3% 4%;
         margin-top: 5%;
+
         span {
           font-size: 16px;
         }
@@ -1422,6 +1433,7 @@ const receivePoint = () => {
         .daibi {
           width: 100%;
           height: 70px;
+
           .mint {
             font-size: 14px;
           }

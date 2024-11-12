@@ -18,11 +18,11 @@ import {keypairIdentity, Metaplex} from "@metaplex-foundation/js";
 export const wallets = [new PhantomWalletAdapter()];
 
 // 导出网络端点
-export const endpoint = clusterApiUrl("devnet");
+export const endpoint = clusterApiUrl("mainnet-beta");
 
 export class WalletService {
     constructor() {
-        this.connection = new Connection(endpoint);
+        this.connection = new Connection("https://dark-hidden-energy.solana-mainnet.quiknode.pro/16a3d5caba8ac573a1dbf296beaca3e078a1acec");
         this.callbacks = {
             onConnect: null,
             onDisconnect: null,
@@ -46,7 +46,7 @@ export class WalletService {
         // const keypair = Keypair.generate();
         const metaplex = new Metaplex(connection);
         let num = 0;
-        const allNFTs = await metaplex.nfts().findAllByOwner({"owner":this.wallet.publicKey});
+        const allNFTs = await metaplex.nfts().findAllByOwner({"owner": this.wallet.publicKey});
         console.log(allNFTs)
         for (const allNFTsKey in allNFTs) {
             if (allNFTs[allNFTsKey].creators[0].address.toBase58() == NFT_CREATE.toBase58()
