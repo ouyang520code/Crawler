@@ -14,8 +14,8 @@
       </div>
     </div>
     <div class="info">
-      <span>{{ t("home.address") }}：{{ walletAddress }}</span>
-      <div>
+      <div>{{ t("home.address") }}：{{ walletAddress }}</div>
+      <div class="nft_span">
         NFT：{{
           createNftNum
         }}<span style="margin-left: 10px">{{
@@ -1035,7 +1035,7 @@ const receivePoint = () => {
 
   .info {
     width: 70%;
-    min-height: 119px;
+    min-height: 101px;
     height: auto;
     border-radius: 5px;
     border: 1px solid #8a3dff;
@@ -1045,16 +1045,15 @@ const receivePoint = () => {
     border-radius: 8px;
     background: linear-gradient(152deg, #261840 0%, #1e1430 47%, #1f1534 100%);
 
-    span {
+    div {
       color: #ffffff;
       font-size: 18px;
     }
 
-    div {
+    .nft_span {
       color: #ffffff;
       font-size: 18px;
       margin-top: 2%;
-
       span {
         color: #813dff;
       }
@@ -1311,20 +1310,25 @@ const receivePoint = () => {
 
     .info {
       width: 95%;
-      min-height: 78px;
+      min-height: 68px;
       height: auto;
+      padding: 1% 3% 2% 3%;
+      box-sizing: border-box;
       border-radius: 5px;
       margin: 34% auto;
-
-      span {
+      div{
         word-wrap: break-word;
         word-break: break-all;
         font-size: 12px;
       }
-
-      div {
-        font-size: 14px;
+      .nft_span {
+      color: #ffffff;
+      font-size: 12px;
+      margin-top: 1%;
+      span {
+        color: #813dff;
       }
+    }
     }
 
     .product {

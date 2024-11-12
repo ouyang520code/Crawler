@@ -18,7 +18,7 @@ const routes = [
         name: "home",
         component: () => import("@/views/home/index.vue"),
         meta: {
-          title: "ICO",
+          title: "Home",
         },
       },
       {
