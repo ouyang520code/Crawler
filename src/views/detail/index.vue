@@ -88,8 +88,8 @@ const linkhash = (item)=>{
   window.open(link, "_blank");
 }
 const add = () => {
-  if (currentPage.value >= count.value) return showToast("已经是最后一页");
-  if (list.value.length == 0) return showToast("暂无更多数据~");
+  if (currentPage.value >= count.value) return showToast("It's already the last page");
+  if (list.value.length == 0) return showToast("No more data available at the moment~");
   currentPage.value += 1;
   getaddress();
 };
@@ -109,7 +109,7 @@ const getaddress = () => {
     .then((res: any) => {
       if (res.code == 200) {
         let redcuo = res.data;
-        if (redcuo.length == 0) return showToast("t('detail.emtype')");
+        if (redcuo.length == 0) return showToast(t('detail.emtype'));
         count.value = Math.ceil(res.count / 30);
         redcuo.forEach((item, index) => {
           item.hash = item.tx.substring(0, 4) + "......" + item.tx.slice(-4);
@@ -119,12 +119,12 @@ const getaddress = () => {
         rows.value = chunkedArray();
         console.log("rows>>>", rows.value);
       } else {
-        showToast("t('detail.fial')");
+        showToast(t('detail.fial'));
         console.log("res失败>>", res);
       }
     })
     .catch((err) => {
-      showToast("t('detail.fial')");
+      showToast(t('detail.fial'));
       console.log("err地址查询坐标>>>", err);
     });
 };
