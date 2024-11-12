@@ -15,7 +15,7 @@ window.process = process;
 window.Buffer = Buffer;
 
 router.beforeEach((to, from, next) => {
-  document.title = `${to.meta.title || ""} | phyon`;
+  document.title = `${to.meta.title || ""} | reptile1024`;
   next();
 });
 // 国际化配置

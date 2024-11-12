@@ -130,7 +130,7 @@ const solMintNft = async () => {
   //   return showToast(t("pool.mint"));
   // }
   if (pointBalance.value == 0) {
-    return showToast(t("Your 1024 Debris is insufficient"));
+    return showToast(t("Your fragments are insufficient"));
   }
 
   const provider = walletService.getProvider(walletService.wallet);

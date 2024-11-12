@@ -18,7 +18,7 @@ const routes = [
         name: "home",
         component: () => import("@/views/home/index.vue"),
         meta: {
-          title: "首页",
+          title: "ICO",
         },
       },
       {
@@ -26,7 +26,7 @@ const routes = [
         name: "pool",
         component: () => import("@/views/pool/index.vue"),
         meta: {
-          title: "碎片合成",
+          title: "Fragment",
         },
       },
       {
@@ -34,7 +34,7 @@ const routes = [
         name: "detail",
         component: () => import("@/views/detail/index.vue"),
         meta: {
-          title: "数据查询",
+          title: "Query",
         },
       },
     ],
