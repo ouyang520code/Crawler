@@ -147,7 +147,7 @@ const threeJsContainer = ref<HTMLElement | null>(null);
 const connected = ref(false);
 const walletAddress = ref("");
 const balance = ref(0);
-const connection = new Connection(clusterApiUrl("devnet"));
+const connection = new Connection("https://dark-hidden-energy.solana-mainnet.quiknode.pro/16a3d5caba8ac573a1dbf296beaca3e078a1acec");
 const finish = ref(false);
 const gressWidth = ref(0);
 const number = ref(1);
@@ -451,7 +451,7 @@ const buyNode = async () => {
 
     // 检查 PDA 账户是否存在
     const accountInfo = await connection.getAccountInfo(pdaAccount);
-
+    console.log(accountInfo);
     if (!accountInfo) {
       instructions.push(
           await program.methods
@@ -775,16 +775,16 @@ const solMintPoint = async () => {
             pdaAccount: pdaAccount,
             tokenInfo: userTokenAccount.address,
             tokenOwnerInfo: provider.wallet.publicKey,
-            // metadataInfo: METADATA_INFO,
-            metadataInfo: new PublicKey(
-                "55uh8C2y2MKoMpkkPQVHc8EymQ822M1eeYurTim1g5v4"
-            ),
+            metadataInfo: METADATA_INFO,
+            // metadataInfo: new PublicKey(
+            //     "9gC1rg4RdQU3JEoHsZFm53JheWBPJFLVD5xTTvC2Z4KS"
+            // ),
             masterEditionInfo: MASTER_EDITION_INFO,
             tokenMetadataProgramInfo: TOKEN_METADATA_PROGRAM_ID,
-            // mintInfo: MINT_INFO,
-            mintInfo: new PublicKey(
-                "3gQVUrzb5qWFsNppMWMVMPMaRkpDBqtH5RZHYaokoBdE"
-            ),
+            mintInfo: MINT_INFO,
+            // mintInfo: new PublicKey(
+            //     "3gQVUrzb5qWFsNppMWMVMPMaRkpDBqtH5RZHYaokoBdE"
+            // ),
             updateAuthorityInfo: pointPDA,
             payerInfo: provider.wallet.publicKey,
             systemProgramInfo: new PublicKey("11111111111111111111111111111111"),
@@ -975,7 +975,7 @@ const receivePoint = () => {
           setTimeout(() => {
             closeToast();
             solMintPoint();
-          }, 6000);
+          }, 10000);
         })
         .catch((err) => {
           isflag.value = true;
