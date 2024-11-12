@@ -1312,7 +1312,7 @@ const receivePoint = () => {
       width: 95%;
       min-height: 68px;
       height: auto;
-      padding: 1% 3% 2% 3%;
+      padding: 2% 3% 2% 3%;
       box-sizing: border-box;
       border-radius: 5px;
       margin: 34% auto;
