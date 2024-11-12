@@ -84,7 +84,7 @@ const createNftNum = ref(0);
 
 // 跳转超链接
 const linkhash = (item)=>{
-  const link = "https://solscan.io/account/" + item.tx;
+  const link = "https://solscan.io/tx/" + item.tx;
   window.open(link, "_blank");
 }
 const add = () => {
