@@ -77,7 +77,7 @@
             <img src="../../assets/img/cong.png" alt="" />
             <span>Reptile</span>
           </div>
-          <text>https://www.iconfont.cn/search/inde</text>
+          <text>https://reptile1024.com/</text>
           <div class="footer_box">
             <img src="../../assets/img/tx.png" alt="" />
             <img src="../../assets/img/foin.png" alt="" />
