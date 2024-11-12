@@ -90,6 +90,7 @@ import {
 } from "vant";
 import $apis from "@/networks/apis";
 import {useI18n} from "vue-i18n";
+import {publicKey} from "@metaplex-foundation/umi";
 
 const {t} = useI18n();
 const value1 = ref("");
@@ -328,7 +329,7 @@ const mintNft = async () => {
             masterTokenAccountOwner: PDA,
             masterTokenAccount: MASTER_TOKEN_ACCOUNT,
             masterMetadata: MASTER_METADATA,
-            updateAuthority: PDA,
+            updateAuthority: publicKey("9kaxTZeSR1MFZcLENZJBmy6xeXHmdeXakiBq9K1JDS88"),
             splTokenProgram: TOKEN_PROGRAM_ID,
             splAtaProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
             sysvarInstructions: SYSVAR_INSTRUCTIONS,
