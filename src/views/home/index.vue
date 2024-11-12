@@ -466,7 +466,7 @@ const buyNode = async () => {
     }
 
     const baseAmount = Number(inputAmount.value * 100);
-    const multiplier = new BN(1_000_000_00);
+    const multiplier = new BN(1_000_000_000);
     const amountBN = new BN(baseAmount).mul(multiplier);
 
     instructions.push(
