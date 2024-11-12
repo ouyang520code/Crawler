@@ -686,7 +686,7 @@ const updateProgress = (item, items_all) => {
 // 跳转sol浏览器
 const linksol = () => {
   const coreinfo = JSON.parse(localStorage.getItem("coreinfo"));
-  const link = "https://solscan.io/account/" + coreinfo.tx;
+  const link = "https://solscan.io/tx/" + coreinfo.tx;
   window.open(link, "_blank");
 };
 // Mint Point 功能
